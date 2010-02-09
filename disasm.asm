@@ -55,8 +55,15 @@ main proc
     lea dx, buff
     int 21h
 
-    ; now we have a buffer, will control it at further
-
+    ; Now we have a buffer, will control it at further
+    ; Then here will be a main cycle, where each student function
+    ; will be called. The buffer of commands will be managed, to have
+    ; length at any time >= 15bytes. If no command were recognized, we simply
+    ; output one byte in HEX, and run cycle again, until EOF reached.
+    ; Students must provide object files, that exports their functions.
+    ; Also it will some convinient mechanism, that allow students to add their functions,
+    ; without touching this file 
+    ; @kravitz 08.02.10 22:39
 exit:
     mov ax, 4c00h
     int 21h
