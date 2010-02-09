@@ -61,7 +61,7 @@ main proc
     ; length at any time >= 15bytes. If no command were recognized, we simply
     ; output one byte in HEX, and run cycle again, until EOF reached.
     ; Students must provide object files, that exports their functions.
-    ; Also it will some convinient mechanism, that allow students to add their functions,
+    ; Also there will be some convenient mechanism, that allow students to add their functions,
     ; without touching this file 
     ; @kravitz 08.02.10 22:39
 exit:
