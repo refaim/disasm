@@ -46,4 +46,4 @@ parse.obj:
 	$(TASM) $(TFLAGS) parse.asm
 
 disasm.obj: 
-	$(TASM) $(TFLAGS) disasm.asm
+	$(TASM) $(TFLAGS) main.asm

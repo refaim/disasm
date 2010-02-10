@@ -1,4 +1,3 @@
-; main control module
 .model small
 locals
 
@@ -7,16 +6,16 @@ public print
 extrn parse: far
 
 stk segment stack use16
-    db 256 dup(0)
+    db 256 dup (?)
 stk ends
 
 data segment para public 'data' use16
     input_msg db 'Input filename: $'
+    filehandle dw 0
     db 254 
     db 0 
     buff db 255 dup (?)
     out_buff db 255 dup (?)
-    filehandle dw 0
 data ends
 
 code segment para public 'code' use16
@@ -51,7 +50,7 @@ main proc
                 
     mov bx, ax
     mov ah, 3Fh
-    mov cx, 253
+    mov cx, 255 - 2
     lea dx, buff
     int 21h
 
@@ -65,7 +64,7 @@ main proc
     ; without touching this file 
     ; @kravitz 08.02.10 22:39
 exit:
-    mov ax, 4c00h
+    mov ax, 4C00h
     int 21h
 main endp
 code ends
