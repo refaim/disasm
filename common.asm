@@ -6,7 +6,7 @@ public print, byte2hex
 code segment para public 'code' use16
 assume cs: code
 
-; print string ended by $ to stdout
+; print '$'-terminated string
 ; string address must be in dx
 print proc pascal far
 uses ax
