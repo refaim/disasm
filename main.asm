@@ -1,7 +1,7 @@
 .model small
 locals
 
-extrn print: far
+extrn print: far, byte2hex: far
 extrn parse: far
 
 stk segment stack use16
@@ -40,13 +40,15 @@ main proc
     mov ax, 3D00h
     lea dx, in_buff
     int 21h
+    jc @@error
     mov filehandle, ax
 
     mov bx, ax
     mov ah, 3Fh
-    mov cx, 253
+    mov cx, 255 - 2
     lea dx, in_buff
     int 21h
+    jc @@error
 
     ; Now we have a buffer, will control it at further
     ; Then here will be a main cycle, where each student function
@@ -57,8 +59,11 @@ main proc
     ; Also there will be some convenient mechanism, that allow students to add their functions,
     ; without touching this file
     ; @kravitz 08.02.10 22:39
-exit:
+@@exit:
     mov ax, 4C00h
+    int 21h
+@@error:
+    mov ax, 4C01h
     int 21h
 main endp
 code ends
