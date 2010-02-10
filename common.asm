@@ -29,14 +29,14 @@ get_digit:
     cmp dx, 0Ah
     jae set_letter
     add dx, '0'
-    jmp write
+    jmp short write
 set_letter:
     add dx, 'A' - 0Ah
 write:
     cmp cx, 2
     jl second
     mov al, dl
-    jmp next
+    jmp short next
 second:
     mov ah, dl
 next:
