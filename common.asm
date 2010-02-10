@@ -18,10 +18,10 @@ print endp
 ; convert byte in al to its ASCII hex representation
 ; ax contains the result
 byte2hex proc pascal far
-uses bx, dx, si
+uses bx, cx, dx
     xor bx, bx
     mov bl, al
-    mov si, 2
+    mov cx, 2
 get_digit:
     mov dx, bx
     shr bx, 4
@@ -33,14 +33,14 @@ get_digit:
 set_letter:
     add dx, 'A' - 0Ah
 write:
-    cmp si, 2
+    cmp cx, 2
     jl second
     mov al, dl
     jmp next
 second:
     mov ah, dl
 next:
-    dec si
+    dec cx
     jnz get_digit
     ret
 byte2hex endp
