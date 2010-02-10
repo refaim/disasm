@@ -1,13 +1,12 @@
 .model small
 locals
 
-public print, byte2hex
+public print, byte2hex, memcpy
 
 code segment para public 'code' use16
 assume cs: code
 
-; print '$'-terminated string
-; string address must be in dx
+; print '$'-terminated string addressed by dx
 print proc pascal far
 uses ax
     mov ah, 09h
@@ -44,6 +43,21 @@ next:
     jnz get_digit
     ret
 byte2hex endp
+
+; copy bytes from memory to memory
+; si - source address, di - destination address, cx - count to copy
+memcpy proc pascal far
+uses ax, bx, si, di
+    mov bx, si
+    xor si, si
+@@copy:
+    mov al, byte ptr bx[si]
+    mov byte ptr [di], al
+    inc si
+    inc di
+    loop @@copy
+    ret
+memcpy endp
 
 code ends
 end
