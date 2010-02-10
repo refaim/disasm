@@ -16,6 +16,8 @@ data segment para public 'data' use16
     db 0
     in_buff db 255 dup (?)
     out_buff db 255 dup (?)
+
+    test_str db 3 dup (?)
 data ends
 
 code segment para public 'code' use16
@@ -25,13 +27,12 @@ main proc
     mov ax, data
     mov ds, ax
 
-    mov dx, offset input_msg
+    lea dx, input_msg
     call print
 
     mov ah, 0Ah
     mov dx, offset in_buff - 2 ; the last symbol always will be 0Dh
     int 21h
-
     mov al, byte ptr [offset in_buff - 1] ; get the count of read bytes
     xor ah, ah
     mov si, ax
@@ -49,6 +50,19 @@ main proc
     lea dx, in_buff
     int 21h
     jc @@error
+
+    xor si, si
+@@cout:
+    mov al, in_buff[si]
+    call byte2hex
+    mov test_str[0], ah
+    mov test_str[1], al
+    mov test_str[2], '$'
+    lea dx, test_str
+    call print
+    inc si
+    cmp si, 100
+    jl @@cout
 
     ; Now we have a buffer, will control it at further
     ; Then here will be a main cycle, where each student function
