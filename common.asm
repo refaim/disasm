@@ -1,6 +1,6 @@
 .model small
 locals
- 
+
 public print
 
 code segment para public 'code' use16
@@ -16,5 +16,3 @@ print endp
 
 code ends
 end
- 
-

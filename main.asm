@@ -12,7 +12,7 @@ data segment para public 'data' use16
     input_msg db 'Input filename: $'
     filehandle dw 0
 
-    db 254 
+    db 254
     db 0
     in_buff db 255 dup (?)
     out_buff db 255 dup (?)
