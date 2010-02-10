@@ -1,31 +1,33 @@
-.PHONY: all clean disasm
+.PHONY: all clean inform
 
-# Tested with GNU Make, which comes with MinGW
-# to use - type: make [TARGET], where TARGET can be one that looks like
-# <TARGET>: <actions>
+# Written on GNU Make, which comes with MinGW
+# Using: 'make [CFG=<debug|release>]' ('CFG=debug' by default)
+
+APPNAME = disasm
+OBJS = main.obj common.obj parse.obj
+TESTOBJS = test.com test.obj
+OUTFILES = $(APPNAME).exe $(OBJS) $(TESTOBJS) *.lst *.map *.tr *.tr2
 
 ifeq ($(CFG),)
 CFG = debug
 endif
 
-objects = *.exe *.com *.lst *.map *.tr *.tr2 disasm.obj parse.obj
-
 TPATH = C:/TASM/BIN
-
 TASM = $(TPATH)/TASM.EXE
 TLINK = $(TPATH)/TLINK.EXE
 TD = $(TPATH)/TD.EXE
 
-LFLAGS = /v /C /d
 TFLAGS = /ml /t /w2
+LFLAGS = /C /d
 ifeq ($(CFG), debug)
 	TFLAGS += /l /z /zi
+	LFLAGS += /v
 endif
 
-all: clean disasm
+all: clean $(APPNAME).exe
 
 clean:
-	del /q $(objects) 2> nul
+	del /q $(OUTFILES) 2> nul
 
 inform:
 ifneq ($(CFG), release)
@@ -35,15 +37,18 @@ ifneq ($(CFG), debug)
 endif
 endif
 
-disasm: inform parse.obj disasm.obj
-	$(TLINK) $(LFLAGS) disasm.obj + parse.obj
+$(APPNAME).exe: inform $(OBJS)
+	$(TLINK) $(LFLAGS) $(OBJS), $(APPNAME).exe
 
-#test.asm: inform
-#	$(TASM) $@
-#	$(TLINK) /t $@
+main.obj:
+	$(TASM) $(TFLAGS) main.asm
 
-parse.obj: 
+common.obj:
+	$(TASM) $(TFLAGS) common.asm
+
+parse.obj:
 	$(TASM) $(TFLAGS) parse.asm
 
-disasm.obj: 
-	$(TASM) $(TFLAGS) main.asm
+test:
+	$(TASM) $(TFLAGS) $@.asm
+	$(TLINK) /t /c $@.obj
