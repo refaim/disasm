@@ -9,9 +9,9 @@ public parse
 data segment para public 'data' use16
     ; [70h, 7Fh] + [0Fh 80h, 0Fh 8Fh] + {E3h}
     elm_sz db 4
-    oss db 1 dup('jo$$', 'jno$', 'jb$$', 'jae$', 'je$$', 'jnz$', 'jbe$', \
-                 'ja$$', 'js$$', 'jns$', 'jp$$', 'jpo$', 'jl$$', 'jge$', \
-                 'jle$', 'jg$$')
+    oss db 1 dup('jo  ', 'jno ', 'jb  ', 'jae ', 'je  ', 'jnz ', 'jbe ', \
+                 'ja  ', 'js  ', 'jns ', 'jp  ', 'jpo ', 'jl  ', 'jge ', \
+                 'jle ', 'jg  ')
     os_jcxz db 'jcxz$'
     oc_jcxz db 0E3h
 
@@ -46,6 +46,8 @@ uses ax, cx, dx
 @@near:
 @@exit:
     pop si
+    add si, 1
+    add di, 4
     ret
 parse endp
 
