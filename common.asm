@@ -41,7 +41,7 @@ uses bx, cx, dx
     mov ah, dl
 @@next:
     dec cx
-    jnz get_digit
+    jnz @@get_digit
     ret
 byte2hex endp
 
