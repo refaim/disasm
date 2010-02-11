@@ -97,6 +97,7 @@ main proc
     ; It's necessary to know entry state, because this is the only way to determine
     ; whether the command recognized
     include invokes.inc
+    invoke parse_jxx
     ; If no command was recognized - simply output it
     mov al, byte ptr [si]
     call byte2hex

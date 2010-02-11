@@ -4,7 +4,7 @@ locals
 
 extrn memcpy: far
 
-public parse
+public parse_jxx
 
 data segment para public 'data' use16
     ; [70h, 7Fh] + [0Fh 80h, 0Fh 8Fh] + {E3h}
@@ -25,9 +25,8 @@ data ends
 code segment para public 'code' use16
 assume cs: code, ds: data
 
-parse proc pascal far
+parse_jxx proc pascal far
 uses ax, cx, dx
-    push si
     xor ax, ax
     mov al, byte ptr [si]
     cmp al, oc_near_prefix
@@ -37,19 +36,20 @@ uses ax, cx, dx
     cmp al, oc_short_hbound
     jg short @@exit
 @@short:
+    push si
     sub al, oc_short_lbound
     mul elm_sz
     mov si, ax
     lea si, oss[si]
     mov cl, elm_sz
     call memcpy
-@@near:
-@@exit:
     pop si
     add si, 1
     add di, 4
+@@near:
+@@exit:
     ret
-parse endp
+parse_jxx endp
 
 code ends
 end
