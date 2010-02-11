@@ -7,7 +7,7 @@ num equ 111111111111111b ; 42975
 .code
     org 100h
 start:
-    jne exit
+    jz exit
     mov ax, num
     and ax, ax
     jz exit
@@ -19,7 +19,7 @@ start:
         shl ax, 1
         jc found
         xor bx, bx
-        jmp next
+        jmp short next
         found:
             inc bx
             cmp bx, 4

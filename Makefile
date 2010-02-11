@@ -12,7 +12,7 @@ ifeq ($(CFG),)
 CFG = debug
 endif
 
-TPATH = C:/TASM/BIN
+TPATH = H:/TASM/BIN
 TASM = $(TPATH)/TASM.EXE
 TLINK = $(TPATH)/TLINK.EXE
 TD = $(TPATH)/TD.EXE

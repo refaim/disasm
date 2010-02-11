@@ -1,20 +1,50 @@
 .model small
 locals
 
-extrn print: far
+extrn memcpy: far
 
 public parse
 
 data segment para public 'data' use16
-    test_msg db "Hello World!$"
+    ; [70h, 7Fh] + [0Fh 80h, 0Fh 8Fh] + {E3h}
+    elm_sz db 4
+    oss db 1 dup('jo$$', 'jno$', 'jb$$', 'jae$', 'je$$', 'jnz$', 'jbe$', \
+                 'ja$$', 'js$$', 'jns$', 'jp$$', 'jpo$', 'jl$$', 'jge$', \
+                 'jle$', 'jg$$')
+    os_jcxz db 'jcxz$'
+    oc_jcxz db 0E3h
+
+    oc_short_lbound equ 70h
+    oc_short_hbound equ 7Fh
+    oc_near_prefix equ 0Fh
+    oc_near_lbound equ 80h
+    oc_near_hbound equ 8Fh
 data ends
 
 code segment para public 'code' use16
-assume cs: code
+assume cs: code, ds: data
 
-parse proc far
-    lea dx, test_msg
-    call print
+parse proc pascal far
+uses ax, cx, dx
+    push si
+    xor ax, ax
+    mov al, byte ptr [si]
+    cmp al, oc_near_prefix
+    je @@near
+    cmp al, oc_short_lbound ; пропускаем все команды не из диапазона
+    jl @@exit
+    cmp al, oc_short_hbound
+    jg @@exit
+@@short:
+    sub al, oc_short_lbound
+    mul elm_sz
+    mov si, ax
+    lea si, oss[si]
+    mov cl, elm_sz
+    call memcpy
+@@near:
+@@exit:
+    pop si
     ret
 parse endp
 

@@ -47,7 +47,7 @@ byte2hex endp
 ; copy bytes from memory to memory
 ; si - source address, di - destination address, cx - count to copy
 memcpy proc pascal far
-uses ax, bx, si, di
+uses ax, bx, cx, si, di
     mov bx, si
     xor si, si
 @@copy:

@@ -15,13 +15,24 @@ data segment para public 'data' use16
     db 254
     db 0
     in_buff db 255 dup (?)
+    in_buff_size db 0
     out_buff db 255 dup (?)
-
-    test_str db 3 dup (?)
 data ends
+
+OUT_BUFF_MARGIN = 235
+IN_BUFF_MARGIN = 240
 
 code segment para public 'code' use16
 assume cs: code, ds: data, ss: stk
+
+; dx - offset of buffer, cx - count to read
+read proc pascal
+uses bx
+    mov bx, filehandle
+    mov ah, 3Fh
+    int 21h
+    ret
+read endp
 
 main proc
     mov ax, data
@@ -44,25 +55,79 @@ main proc
     jc @@error
     mov filehandle, ax
 
-    mov bx, ax
-    mov ah, 3Fh
-    mov cx, 255 - 2
+    ;mov bx, ax
+    ;mov ah, 3Fh
+    ;mov cx, 255
+    ;lea dx, in_buff
+    ;int 21h
+    mov cx, 255
     lea dx, in_buff
-    int 21h
+    call read
     jc @@error
+    mov in_buff_size, al
+    
+    lea si, in_buff
+    lea di, out_buff    
+@@main_cycle:
+    push si
+    push di
 
-    xor si, si
-@@cout:
-    mov al, in_buff[si]
-    call byte2hex
-    mov test_str[0], ah
-    mov test_str[1], al
-    mov test_str[2], '$'
-    lea dx, test_str
+    call parse
+    mov bp, sp   
+    cmp si, word ptr [bp+2]
+    ja @@restart
+    jne @@error
+
+    mov al, byte ptr [si]
+    call byte2hex    
+    mov [di], ah
+    mov [di+1], al
+    mov byte ptr [di+2], ' '
+    add di, 3    
+@@restart:
+    ;check if in_buff need to be flushed
+    pop ax ;di
+    mov bx, di
+    sub bx, ax
+    cmp bx, OUT_BUFF_MARGIN
+    jb @@in_buff_check 
+    mov byte ptr [di], '$'
+    mov di, ax
+    mov dx, di
     call print
-    inc si
-    cmp si, 100
-    jl @@cout
+@@in_buff_check:
+    pop ax ;si
+    mov bx, si
+    sub bx, ax
+    cmp bx, IN_BUFF_MARGIN
+    
+    push di ; save
+    mov cx, in_buff_size
+    sub cx, bx; length of tail
+    lea di, in_buff
+    call memcpy
+    add di, cx
+    mov dx, di
+
+    cmp bx, cx
+    ;je 
+    ;cmp cx, 255
+    ;jb @@main_cycle
+    jb @@main_cycle 
+
+    ;check if out_buff need to be flushed
+
+
+@@cout:
+    
+    ;mov test_str[0], ah
+    ;mov test_str[1], al
+    ;mov test_str[2], '$'
+    ;lea dx, test_str
+    ;call print
+    ;inc si
+    ;cmp si, 100
+    ;jl @@cout
 
     ; Now we have a buffer, will control it at further
     ; Then here will be a main cycle, where each student function
