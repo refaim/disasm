@@ -90,7 +90,7 @@ main proc
     inc si    ; one unrecognized byte
 @@restart: ; Post iteration actions
     ; Check if in_buff need to be flushed
-    sub sp, 2 ; Same to pop the si 
+    add sp, 2 ; Same to pop the si 
     lea ax, out_buff
     mov bx, di
     sub bx, ax
