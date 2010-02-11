@@ -1,22 +1,30 @@
+; WARNING! 
+; IF YOU WANT TO ADD YOUR OWN FUNCTION TO DISASM YOU DON'T NEED TO TOUCH THIS FILE!
 .model small
 .386
 locals
-; WARNING! IF YOU WANT TO ADD YOUR OWN FUNCTION TO DISASM YOU DON'T
-; NEED TO TOUCH THIS FILE
+
+extrn print: far, byte2hex: far, memcpy: far
+extrn parse: far
 
 OUT_BUFF_MARGIN equ 235
 IN_BUFF_MARGIN  equ 240
 
-invoke macro func ; This macro is NECESSARY to use by users
-    call func     ; it calls func, and performs all necessary checks
-    mov bp, sp   
-    cmp si, word ptr [bp]
-    ja @@restart  ; Very dangerous to make it SHORT - cause main cycle will grow
-    jne @@error
+throw macro msg
+    lea dx, msg
+    call print
+    jmp fatal_error
 endm
 
-extrn print: far, byte2hex: far, memcpy: far
-;extrn parse: far - students need to add their functions in this form
+invoke macro func
+    call func
+    mov bp, sp
+    cmp si, word ptr [bp]
+    ja @@restart ; very dangerous to make it SHORT - cause main cycle will grow
+    je @@continue
+    throw e_si_dec
+@@continue:
+endm
 
 stk segment stack use16
     db 256 dup (0)
@@ -31,18 +39,26 @@ data segment para public 'data' use16
     in_buff db 255 dup (?)
     in_buff_size dw 0
     out_buff db 255 dup (?)
+
+    e_fopen db 'file opening failed$'
+    e_fread db 'file reading failed$'
+    e_si_dec db 'si has been reduced during the parsing, it is forbidden$'
 data ends
 
 code segment para public 'code' use16
-assume cs: code, ds: data, ss: stk ; No one knows why TASM requires this
-; Reads [count] bytes from file 
+assume cs: code, ds: data, ss: stk
+
+; reads [count] bytes from file
 ; dx - offset of buffer, cx - count to read
-; **File handler implictly will be set without any side help
+; **filehandler implictly will be set without any side help
 read proc pascal
 uses bx
     mov bx, filehandle
     mov ah, 3Fh
     int 21h
+    jnc short @@exit
+    throw e_fread
+@@exit:
     ret
 read endp
 
@@ -52,11 +68,11 @@ main proc
     ; Display message for input
     lea dx, input_msg
     call print
-    ; Get console input and store in buffer [only 254bytes will be read for this moment]
+    ; Get console input and store in buffer [only 254 bytes will be read for this moment]
     mov ah, 0Ah
     mov dx, offset in_buff - 2   ; the last symbol always will be 0Dh
     int 21h
-    mov al, [offset in_buff - 1] ; get the count of read bytes
+    mov al, byte ptr [offset in_buff - 1] ; get the count of read bytes
     xor ah, ah
     mov si, ax
     mov in_buff[si], 0           ; prepare filename for retrieving a filehandler
@@ -64,25 +80,26 @@ main proc
     mov ax, 3D00h
     lea dx, in_buff
     int 21h
-    jc @@error                   ; dummy error handling
+    jnc short @@initial_read
+    throw e_fopen
+@@initial_read:
+    ; initialization of commands buffer - reading from file
     mov filehandle, ax
-    ; 1st initialization of commands buffer - reading from file
     mov cx, 255
     lea dx, in_buff
     call read
-    jc @@error
     mov in_buff_size, ax ; actual bytes read
-    
+@@prepare_cycle:
     lea si, in_buff      ; preconditions for users : si - start of commands buffer
     lea di, out_buff     ;                           di - start of output   buffer
 @@main_cycle:
-    push si ; It's necessary to know entry state, because this is the only way to determine
+    push si 
+    ; It's necessary to know entry state, because this is the only way to determine
     ; whether the command recognized
-    ; The lines with invoke must be placed in some .inc file
-    ;invoke parse ; - in this form users will enter commands
-    ;If no command was recognized - simply output it
+    invoke parse
+    ; If no command was recognized - simply output it
     mov al, byte ptr [si]
-    call byte2hex    
+    call byte2hex
     mov [di], ah
     mov [di + 1], al
     mov byte ptr [di + 2], ' '
@@ -90,12 +107,12 @@ main proc
     inc si    ; one unrecognized byte
 @@restart: ; Post iteration actions
     ; Check if in_buff need to be flushed
-    add sp, 2 ; Same to pop the si 
+    add sp, 2 ; Same to pop the si
     lea ax, out_buff
     mov bx, di
     sub bx, ax
     cmp bx, OUT_BUFF_MARGIN
-    jb short @@in_buff_check ; We didn't exceed the constraints for output buffer 
+    jb short @@in_buff_check ; We didn't exceed the constraints for output buffer
     mov byte ptr [di], '$'   ; NEVAR forget, that print accepts the $-terminated strings
     mov di, ax ; The out_buff offset still in ax, we won one memmory access operation :)
     mov dx, di
@@ -105,10 +122,10 @@ main proc
     cmp ax, 255               ; and we check for this case
     je short @@refill         ; and if its happened - we know that EOF reached
     add ax, offset in_buff
-    cmp si, ax                
+    cmp si, ax
     jb @@main_cycle           ; Buffer wasn't fully loaded, but there is still some commands to process
     je short @@cout           ; Buffer wasn't fully loaded, and all commands were processed - finishing work
-@@refill: ; Here we will fill buffer with new bytes from file 
+@@refill: ; Here we will fill buffer with new bytes from file
     lea ax, in_buff
     mov bx, si
     sub bx, ax              ; We have simpy margin - at least 15 bytes from the end of buffer(it equals to the MAX length of Intel
@@ -137,10 +154,10 @@ main proc
     mov byte ptr [di], '$'
     lea dx, out_buff
     call print
-@@exit: ; Normal exit
+@@exit: ; normal exit
     mov ax, 4C00h
     int 21h
-@@error: ; Dummy error handling
+fatal_error: ; error handling
     mov ax, 4C01h
     int 21h
 main endp
