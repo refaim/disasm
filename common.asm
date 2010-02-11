@@ -22,24 +22,24 @@ uses bx, cx, dx
     xor bx, bx
     mov bl, al
     mov cx, 2
-get_digit:
+@@get_digit:
     mov dx, bx
     shr bx, 4
     and dx, 0Fh
     cmp dx, 0Ah
-    jae short set_letter
+    jae short @@set_letter
     add dx, '0'
-    jmp short write
-set_letter:
+    jmp short @@write
+@@set_letter:
     add dx, 'A' - 0Ah
-write:
+@@write:
     cmp cx, 2
-    jl short second
+    jl short @@second
     mov al, dl
-    jmp short next
-second:
+    jmp short @@next
+@@second:
     mov ah, dl
-next:
+@@next:
     dec cx
     jnz get_digit
     ret
