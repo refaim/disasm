@@ -106,6 +106,7 @@ main proc
     mov ax, in_buff_size
     cmp ax, 255
     je short @@refill
+    add ax, offset in_buff
     cmp si, ax
     jb @@main_cycle
     je short @@cout
