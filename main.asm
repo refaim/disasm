@@ -72,7 +72,7 @@ main proc
     mov ah, 0Ah
     mov dx, offset in_buff - 2   ; the last symbol always will be 0Dh
     int 21h
-    mov al, byte ptr [offset in_buff - 1] ; get the count of read bytes
+    mov al, in_buff[-1] ; get the count of read bytes
     xor ah, ah
     mov si, ax
     mov in_buff[si], 0           ; prepare filename for retrieving a filehandler
