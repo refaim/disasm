@@ -5,7 +5,7 @@
 locals
 
 extrn print: far, byte2hex: far, memcpy: far
-extrn parse_jxx: far
+include externs.inc
 
 OUT_BUFF_MARGIN equ 235
 IN_BUFF_MARGIN  equ 240
@@ -96,6 +96,7 @@ main proc
     push si 
     ; It's necessary to know entry state, because this is the only way to determine
     ; whether the command recognized
+    include invokes.inc
     invoke parse_jxx
     ; If no command was recognized - simply output it
     mov al, byte ptr [si]
