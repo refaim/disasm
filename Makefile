@@ -1,10 +1,10 @@
 .PHONY: all clean inform debug
 
 # Written on GNU Make, which comes with MinGW
-# Using: 'make [CFG=<debug|release>]' ('CFG=debug' by default)
+# Using: 'make [debug|test] [CFG=<debug|release>]' ('CFG=debug' by default)
 
 APPNAME = disasm
-OBJS = main.obj common.obj parse.obj
+OBJS = main.obj common.obj p_jxx.obj
 TESTOBJS = test.com test.obj
 OUTFILES = $(APPNAME).exe $(OBJS) $(TESTOBJS) *.lst *.map *.tr *.tr2
 
@@ -40,6 +40,10 @@ endif
 debug: all
 	$(TD) $(APPNAME).exe
 
+test:
+	$(TASM) $(TFLAGS) $@.asm
+	$(TLINK) /t /c $@.obj
+
 $(APPNAME).exe: inform $(OBJS)
 	$(TLINK) $(LFLAGS) $(OBJS), $(APPNAME).exe
 
@@ -49,9 +53,5 @@ main.obj:
 common.obj:
 	$(TASM) $(TFLAGS) common.asm
 
-parse.obj:
-	$(TASM) $(TFLAGS) parse.asm
-
-test:
-	$(TASM) $(TFLAGS) $@.asm
-	$(TLINK) /t /c $@.obj
+p_jxx.obj:
+	$(TASM) $(TFLAGS) p_jxx.asm
