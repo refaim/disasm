@@ -21,7 +21,7 @@ invoke macro func
     mov bp, sp
     cmp si, word ptr [bp]
     ja @@restart ; very dangerous to make it SHORT - cause main cycle will grow
-    je @@continue
+    je short @@continue
     throw e_si_dec
 @@continue:
 endm
