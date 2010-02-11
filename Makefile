@@ -1,4 +1,4 @@
-.PHONY: all clean inform
+.PHONY: all clean inform debug
 
 # Written on GNU Make, which comes with MinGW
 # Using: 'make [CFG=<debug|release>]' ('CFG=debug' by default)
@@ -36,6 +36,9 @@ ifneq ($(CFG), debug)
 	@exit 1
 endif
 endif
+
+debug: all
+	$(TD) $(APPNAME).exe
 
 $(APPNAME).exe: inform $(OBJS)
 	$(TLINK) $(LFLAGS) $(OBJS), $(APPNAME).exe

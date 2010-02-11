@@ -1,4 +1,5 @@
 .model small
+.386
 locals
 
 public print, byte2hex, memcpy
@@ -26,14 +27,14 @@ get_digit:
     shr bx, 4
     and dx, 0Fh
     cmp dx, 0Ah
-    jae set_letter
+    jae short set_letter
     add dx, '0'
     jmp short write
 set_letter:
     add dx, 'A' - 0Ah
 write:
     cmp cx, 2
-    jl second
+    jl short second
     mov al, dl
     jmp short next
 second:

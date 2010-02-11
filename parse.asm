@@ -1,4 +1,5 @@
 .model small
+.386
 locals
 
 extrn memcpy: far
@@ -30,11 +31,11 @@ uses ax, cx, dx
     xor ax, ax
     mov al, byte ptr [si]
     cmp al, oc_near_prefix
-    je @@near
+    je short @@near
     cmp al, oc_short_lbound ; пропускаем все команды не из диапазона
-    jl @@exit
+    jl short @@exit
     cmp al, oc_short_hbound
-    jg @@exit
+    jg short @@exit
 @@short:
     sub al, oc_short_lbound
     mul elm_sz
