@@ -1,9 +1,16 @@
-.model tiny   
+.model tiny
+.386
+
+generate_void macro
+    rept 127
+        nop
+    endm
+endm
+
+num equ 111111111111111b ; 42975
 
 .data
     db 0DEh,0ADh,0BEh,0EFh
-num equ 111111111111111b ; 42975
-
 .code
     org 100h
 start:
@@ -19,18 +26,19 @@ start:
     xor dx, dx
     cycle:
         shl ax, 1
-        jc found
+        jc short found
         xor bx, bx
         jmp short next
         found:
             inc bx
             cmp bx, 4
-            jl next
+            jl short next
             inc dx
         next:
     loop cycle
     nop
     nop
+    ;generate_void
 exit:
     ret
 end start
