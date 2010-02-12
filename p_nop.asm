@@ -1,5 +1,6 @@
 .model small
 .386
+locals
 
 extrn memcpy: far
 
