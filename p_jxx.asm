@@ -27,8 +27,7 @@ assume cs: code, ds: data
 
 parse_jxx proc pascal far
 uses ax, cx, dx
-    xor ax, ax
-    mov al, byte ptr [si]
+    movzx ax, byte ptr [si]
     cmp al, oc_near_prefix
     je short @@near
     cmp al, oc_short_lbound

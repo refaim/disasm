@@ -19,8 +19,7 @@ print endp
 ; ax contains the result
 byte2hex proc pascal far
 uses bx, cx, dx
-    xor bx, bx
-    mov bl, al
+    movzx bx, al
     mov cx, 2
 @@get_digit:
     mov dx, bx
