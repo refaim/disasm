@@ -27,7 +27,7 @@ code segment para public 'code' use16
 assume cs: code, ds: data
 
 parse_jxx proc pascal far
-uses ax, bx, dx
+uses ax, bx, cx
     movzx ax, byte ptr [si]
     cmp al, oc_near_prefix
     je short @@near
