@@ -8,6 +8,8 @@ num equ 111111111111111b ; 42975
     org 100h
 start:
     jz exit
+    nop
+    nop
     mov ax, num
     and ax, ax
     jz exit
@@ -27,6 +29,8 @@ start:
             inc dx
         next:
     loop cycle
+    nop
+    nop
 exit:
     ret
 end start
