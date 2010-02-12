@@ -10,11 +10,13 @@ data segment para public 'data' use16
     ; [70h, 7Fh] + [0Fh 80h, 0Fh 8Fh] + {E3h}
     op_str db 1 dup('jo', 'jno', 'jb', 'jae', 'je', 'jnz', 'jbe', 'ja', \
                     'js', 'jns', 'jp', 'jpo', 'jl', 'jge', 'jle', 'jg')
-    op_shifts db 1 dup (0, 2, 5, 7, 10, 12, 15, 18, 20, 22, 25, 27, 30, \ 
+    op_shifts db 1 dup (0, 2, 5, 7, 10, 12, 15, 18, 20, 22, 25, 27, 30, \
                        32, 35, 38)
-    op_lens db 1 dup (2, 3, 2, 3, 2, 3, 3, 2, 2, 3, 2, 3, 2, 3, 3, 2) 
-    os_jcxz db 'jcxz$'
-    oc_jcxz db 0E3h
+    op_lens db 1 dup (2, 3, 2, 3, 2, 3, 3, 2, 2, 3, 2, 3, 2, 3, 3, 2)
+
+    jcxz_str db 'jcxz'
+    jcxz_oc db 0E3h
+    jcxz_len db 4
 
     oc_short_lbound equ 70h
     oc_short_hbound equ 7Fh
