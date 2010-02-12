@@ -2,7 +2,7 @@
 .386
 
 generate_void macro
-    rept 127
+    rept 500
         nop
     endm
 endm
@@ -16,6 +16,7 @@ num equ 111111111111111b ; 42975
 start:
     jz exit
     nop
+    jcxz cycle
     nop
     mov ax, num
     and ax, ax
