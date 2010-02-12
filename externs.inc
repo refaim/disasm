@@ -1,1 +1,1 @@
-extrn parse_jxx:far
+extrn parse_jxx: far
