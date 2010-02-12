@@ -3,9 +3,20 @@
 .model small
 .386
 locals
-
+if1
+	include funcs.inc
+endif
 extrn print: far, byte2hex: far, memcpy: far
-extrn parse_jxx:far, parse_nop:far
+;extrn parse_jxx:far, parse_nop:far
+irp export_func, <FUNCS>
+	extrn export_func:far
+endm
+
+;user_funcs macro
+;    irp func, <FUNCS>
+;    local @@continue
+;    endm
+;endm
 
 OUT_BUFF_MARGIN equ 235
 IN_BUFF_MARGIN  equ 240
@@ -14,17 +25,6 @@ throw macro msg
     lea dx, msg
     call print
     jmp fatal_error
-endm
-
-invoke macro func
-local @@continue
-    call func
-    mov bp, sp
-    cmp si, word ptr [bp]
-    ja @@restart ; very dangerous to make it SHORT - cause main cycle will grow
-    je short @@continue
-    throw e_si_dec
-@@continue:
 endm
 
 stk segment stack use16
@@ -40,7 +40,11 @@ data segment para public 'data' use16
     in_buff db 255 dup (?)
     in_buff_size dw 0
     out_buff db 255 dup (?)
-
+    funcs LABEL DWORD
+    irp func,<FUNCS>
+    	dd func
+    endm
+    funcs_end LABEL DWORD
     e_fopen db 'file opening failed$'
     e_fread db 'file reading failed$'
     e_si_dec db 'si has been reduced during the parsing, it is forbidden$'
@@ -98,8 +102,23 @@ main proc
     push si 
     ; It's necessary to know entry state, because this is the only way to determine
     ; whether the command recognized
-    invoke parse_jxx
-    invoke parse_nop
+    ;invoke parse_jxx
+    lea bx, funcs
+@@launcher:
+push bx
+    call [bx]
+    mov bp, sp
+    cmp si, word ptr [bp]
+    ja @@restart ; very dangerous to make it SHORT - cause main cycle will grow
+    pop bx
+    add bx, 4
+    je short @@continue
+    throw e_si_dec
+@@continue:
+    cmp bx, offset funcs_end
+    jne @@launcher
+    
+    ;invoke parse_nop
     ; If no command was recognized - simply output it
     mov al, byte ptr [si]
     call byte2hex
