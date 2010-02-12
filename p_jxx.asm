@@ -8,10 +8,11 @@ public parse_jxx
 
 data segment para public 'data' use16
     ; [70h, 7Fh] + [0Fh 80h, 0Fh 8Fh] + {E3h}
-    elm_sz db 4
-    oss db 1 dup('jo  ', 'jno ', 'jb  ', 'jae ', 'je  ', 'jnz ', 'jbe ', \
-                 'ja  ', 'js  ', 'jns ', 'jp  ', 'jpo ', 'jl  ', 'jge ', \
-                 'jle ', 'jg  ')
+    op_str db 1 dup('jo', 'jno', 'jb', 'jae', 'je', 'jnz', 'jbe', 'ja', \
+                    'js', 'jns', 'jp', 'jpo', 'jl', 'jge', 'jle', 'jg')
+    op_shifts db 1 dup (0, 2, 5, 7, 10, 12, 15, 18, 20, 22, 25, 27, 30, \ 
+                       32, 35, 38)
+    op_lens db 1 dup (2, 3, 2, 3, 2, 3, 3, 2, 2, 3, 2, 3, 2, 3, 3, 2) 
     os_jcxz db 'jcxz$'
     oc_jcxz db 0E3h
 
@@ -26,7 +27,7 @@ code segment para public 'code' use16
 assume cs: code, ds: data
 
 parse_jxx proc pascal far
-uses ax, cx, dx
+uses ax, bx, dx
     movzx ax, byte ptr [si]
     cmp al, oc_near_prefix
     je short @@near
@@ -37,12 +38,13 @@ uses ax, cx, dx
 @@short:
     push si
     sub al, oc_short_lbound
-    mul elm_sz
-    mov si, ax
-    lea si, oss[si]
-    mov cl, elm_sz
+    movzx si, al
+    movzx bx, op_lens[si]
+    movzx si, op_shifts[si]
+    lea si, op_str[si]
+    mov cx, bx
     call memcpy
-    add di, 4
+    add di, bx
     mov byte ptr [di], 10
     inc di
     pop si
