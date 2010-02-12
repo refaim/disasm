@@ -38,11 +38,11 @@ data segment para public 'data' use16
     e_fread db 'file reading failed$'
     e_si_dec db 'si has been reduced during the parsing, it is forbidden$'
 
-    funcs LABEL DWORD
+    funcs label dword
     irp parse_func, <FUNCS>
         dd parse_func
     endm
-    funcs_end LABEL DWORD
+    funcs_end label dword
 data ends
 
 code segment para public 'code' use16
@@ -136,7 +136,7 @@ main proc
     add ax, offset in_buff
     cmp si, ax
     jb @@main_cycle           ; Buffer wasn't fully loaded, but there is still some commands to process
-    je short @@cout           ; Buffer wasn't fully loaded, and all commands were processed - finishing work
+    je short @@finish           ; Buffer wasn't fully loaded, and all commands were processed - finishing work
 @@refill: ; Here we will fill buffer with new bytes from file
     lea ax, in_buff
     mov bx, si
@@ -161,7 +161,7 @@ main proc
     mov in_buff_size, bp
     cmp bp, 0  ; If new buffer size = 0 (the rare situation, when length of file = k*max_buff_size)
     jne @@main_cycle ; But if != 0 we're ready to move on
-@@cout:
+@@finish:
     ; flush buffer and exit
     mov byte ptr [di], '$'
     lea dx, out_buff
