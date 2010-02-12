@@ -20,8 +20,8 @@ TD = $(TPATH)/TD.EXE
 TFLAGS = /ml /t /w2
 LFLAGS = /C /d
 ifeq ($(CFG), debug)
-	TFLAGS += /l /z /zi
-	LFLAGS += /v
+TFLAGS += /l /z /zi
+LFLAGS += /v
 endif
 
 all: clean $(APPNAME).exe
