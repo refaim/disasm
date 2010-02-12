@@ -3,9 +3,11 @@
 .model small
 .386
 locals
-
+include funcs.inc
 extrn print: far, byte2hex: far, memcpy: far
-include externs.inc
+irp func,<FUNCTIONS>
+	extrn func:far
+endm
 
 OUT_BUFF_MARGIN equ 235
 IN_BUFF_MARGIN  equ 240
@@ -95,7 +97,9 @@ main proc
     push si 
     ; It's necessary to know entry state, because this is the only way to determine
     ; whether the command recognized
-    include invokes.inc
+    irp func,<FUNCTIONS>
+    	invoke func
+    endm
     ; If no command was recognized - simply output it
     mov al, byte ptr [si]
     call byte2hex
