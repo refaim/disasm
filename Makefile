@@ -4,9 +4,11 @@
 # Using: 'make [debug|test] [CFG=<debug|release>]' ('CFG=debug' by default)
 
 APPNAME = disasm
-OBJS = main.obj common.obj p_jxx.obj p_nop.obj
+OBJS = main.obj common.obj
 TESTOBJS = test.com test.obj
-OUTFILES = $(APPNAME).exe $(OBJS) $(TESTOBJS) *.lst *.map *.tr *.tr2
+PTEMPLATE = p_*
+WLC_PTEMPLATE = $(wildcard $(PTEMPLATE).obj)
+OUTFILES = $(APPNAME).exe $(OBJS) $(WLC_PTEMPLATE) $(TESTOBJS) *.lst *.map *.tr *.tr2
 
 ifeq ($(CFG),)
 CFG = debug
@@ -44,8 +46,8 @@ test:
 	$(TASM) $(TFLAGS) $@.asm
 	$(TLINK) /t /c $@.obj
 
-$(APPNAME).exe: inform $(OBJS)
-	$(TLINK) $(LFLAGS) $(OBJS), $(APPNAME).exe
+$(APPNAME).exe: inform $(OBJS) $(PTEMPLATE).obj
+	$(TLINK) $(LFLAGS) $(OBJS) $(WLC_PTEMPLATE), $(APPNAME).exe
 
 main.obj:
 	$(TASM) $(TFLAGS) main.asm
@@ -53,7 +55,5 @@ main.obj:
 common.obj:
 	$(TASM) $(TFLAGS) common.asm
 
-p_jxx.obj:
-	$(TASM) $(TFLAGS) p_jxx.asm
-p_nop.obj:
-	$(TASM) $(TFLAGS) p_nop.asm
+$(PTEMPLATE).obj:
+	$(TASM) $(TFLAGS) $(PTEMPLATE).asm

@@ -1,1 +1,1 @@
-FUNCS equ parse_jxx,parse_nop
+FUNCS equ parse_jxx, parse_nop

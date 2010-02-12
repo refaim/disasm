@@ -1,22 +1,15 @@
-; WARNING! 
+; WARNING!
 ; IF YOU WANT TO ADD YOUR OWN FUNCTION TO DISASM YOU DON'T NEED TO TOUCH THIS FILE!
 .model small
 .386
 locals
-if1
-	include funcs.inc
-endif
-extrn print: far, byte2hex: far, memcpy: far
-;extrn parse_jxx:far, parse_nop:far
-irp export_func, <FUNCS>
-	extrn export_func:far
-endm
 
-;user_funcs macro
-;    irp func, <FUNCS>
-;    local @@continue
-;    endm
-;endm
+extrn print: far, byte2hex: far, memcpy: far
+
+include funcs.inc
+irp parse_func, <FUNCS>
+    extrn parse_func: far
+endm
 
 OUT_BUFF_MARGIN equ 235
 IN_BUFF_MARGIN  equ 240
@@ -40,14 +33,16 @@ data segment para public 'data' use16
     in_buff db 255 dup (?)
     in_buff_size dw 0
     out_buff db 255 dup (?)
-    funcs LABEL DWORD
-    irp func,<FUNCS>
-    	dd func
-    endm
-    funcs_end LABEL DWORD
+
     e_fopen db 'file opening failed$'
     e_fread db 'file reading failed$'
     e_si_dec db 'si has been reduced during the parsing, it is forbidden$'
+
+    funcs LABEL DWORD
+    irp parse_func, <FUNCS>
+        dd parse_func
+    endm
+    funcs_end LABEL DWORD
 data ends
 
 code segment para public 'code' use16
@@ -93,33 +88,28 @@ main proc
     lea dx, in_buff
     call read
     mov in_buff_size, ax ; actual bytes read
-@@prepare_cycle:
+    ; prepare cycle
     lea si, in_buff      ; preconditions for users : si - start of commands buffer
     lea di, out_buff     ;                           di - start of output   buffer
     mov byte ptr [di], 10 ; LF
     inc di
 @@main_cycle:
-    push si 
+    push si
     ; It's necessary to know entry state, because this is the only way to determine
     ; whether the command recognized
-    ;invoke parse_jxx
     lea bx, funcs
 @@launcher:
-push bx
-    call [bx]
+    call dword ptr [bx]
     mov bp, sp
     cmp si, word ptr [bp]
-    ja @@restart ; very dangerous to make it SHORT - cause main cycle will grow
-    pop bx
-    add bx, 4
+    ja short @@restart
     je short @@continue
     throw e_si_dec
 @@continue:
+    add bx, 4
     cmp bx, offset funcs_end
     jne @@launcher
-    
-    ;invoke parse_nop
-    ; If no command was recognized - simply output it
+    ; if no command was recognized - simply output it
     mov al, byte ptr [si]
     call byte2hex
     mov [di], ah
