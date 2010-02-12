@@ -1,9 +1,20 @@
-Полезные ссылки:
+Пример дизассемблера .COM-файлов для DOS. Написан на Turbo Assembler 4.1. Разрабатывается группой студентов исключительно в учебных целях.
 
-    DOS Function codes: http://spike.scu.edu.au/~barry/interrupts.html
-    Assembler IBM PC: http://mini-soft.ru/book/assem/index.php
-    TASM 3.0 Manual: http://www.citforum.ru/programming/tasm3r/index.shtml
-    TASM Reference Book: http://www.codenet.ru/progr/asm/tasm/index.php
+Авторы:
+Кравцов Дмитрий, idkravitz@gmail.com
+Харитонов Роман, refaim.vl@gmail.com
+
+Тестирование и code review:
+Бураго Игорь
+Лукащук Максим
+Строкач Александр
+
+Полезные ссылки:
+DOS Function codes: http://spike.scu.edu.au/~barry/interrupts.html
+Assembler IBM PC: http://mini-soft.ru/book/assem/index.php
+TASM 3.0 Manual: http://www.citforum.ru/programming/tasm3r/index.shtml
+TASM Reference Book: http://www.codenet.ru/progr/asm/tasm/index.php
+
 
 FAQ для студентов 236 и 238 групп ИМКН ДВГУ:
 
