@@ -5,9 +5,7 @@
 locals
 include funcs.inc
 extrn print: far, byte2hex: far, memcpy: far
-irp func,<FUNCTIONS>
-	extrn func:far
-endm
+	extrn parse_jxx:far, parse_nop:far
 
 OUT_BUFF_MARGIN equ 235
 IN_BUFF_MARGIN  equ 240
@@ -19,6 +17,7 @@ throw macro msg
 endm
 
 invoke macro func
+local @@continue
     call func
     mov bp, sp
     cmp si, word ptr [bp]
@@ -93,13 +92,15 @@ main proc
 @@prepare_cycle:
     lea si, in_buff      ; preconditions for users : si - start of commands buffer
     lea di, out_buff     ;                           di - start of output   buffer
+    mov byte ptr [di], 10
+    inc di
 @@main_cycle:
     push si 
     ; It's necessary to know entry state, because this is the only way to determine
     ; whether the command recognized
-    irp func,<FUNCTIONS>
-    	invoke func
-    endm
+    	invoke parse_jxx
+	invoke parse_nop
+	
     ; If no command was recognized - simply output it
     mov al, byte ptr [si]
     call byte2hex
