@@ -70,11 +70,10 @@ main proc
     call print
     ; Get console input and store in buffer [only 254 bytes will be read for this moment]
     mov ah, 0Ah
-    mov dx, offset in_buff - 2   ; the last symbol always will be 0Dh
+    mov dx, offset in_buff - 2 ; the last symbol always will be 0Dh
     int 21h
-    mov al, in_buff[-1] ; get the count of read bytes
-    xor ah, ah
-    mov si, ax
+    mov al, in_buff - 1 ; get the count of read bytes
+    movzx si, al
     mov in_buff[si], 0           ; prepare filename for retrieving a filehandler
     ; Open file for read
     mov ax, 3D00h
@@ -155,6 +154,9 @@ main proc
     lea dx, out_buff
     call print
 @@exit: ; normal exit
+    mov ah, 3eh ; close file
+    mov bx, filehandle
+    int 21h
     mov ax, 4C00h
     int 21h
 fatal_error: ; error handling
