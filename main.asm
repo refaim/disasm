@@ -112,8 +112,8 @@ main proc
     ; if no command was recognized - simply output it
     mov al, byte ptr [si]
     call byte2hex
-    mov [di], ah
-    mov [di + 1], al
+    xchg al, ah
+    mov [di], ax
     mov byte ptr [di + 2], ' '
     add di, 3 ; two hex digits and one space
     inc si    ; one unrecognized byte
