@@ -31,7 +31,7 @@ uses ax, cx, dx
     mov al, byte ptr [si]
     cmp al, oc_near_prefix
     je short @@near
-    cmp al, oc_short_lbound ; пропускаем все команды не из диапазона
+    cmp al, oc_short_lbound
     jl short @@exit
     cmp al, oc_short_hbound
     jg short @@exit
@@ -43,9 +43,11 @@ uses ax, cx, dx
     lea si, oss[si]
     mov cl, elm_sz
     call memcpy
-    pop si
-    add si, 1
     add di, 4
+    mov byte ptr [di], 10
+    inc di
+    pop si
+    inc si
 @@near:
 @@exit:
     ret
