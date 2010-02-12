@@ -92,7 +92,7 @@ main proc
 @@prepare_cycle:
     lea si, in_buff      ; preconditions for users : si - start of commands buffer
     lea di, out_buff     ;                           di - start of output   buffer
-    mov byte ptr [di], 10
+    mov byte ptr [di], 10 ; LF
     inc di
 @@main_cycle:
     push si 
