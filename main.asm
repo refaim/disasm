@@ -87,6 +87,8 @@ main proc
     mov cx, 255
     lea dx, in_buff
     call read
+    test ax, ax
+    jz @@exit ; zero-length file
     mov in_buff_size, ax ; actual bytes read
     ; prepare cycle
     lea si, in_buff      ; preconditions for users : si - start of commands buffer
@@ -159,7 +161,7 @@ main proc
     call read     ; and now in place after copied tail
     add bp, ax ; Evaluate the new buffer size (sizeof Tail + sizeof Actual Read)
     mov in_buff_size, bp
-    cmp bp, 0  ; If new buffer size = 0 (the rare situation, when length of file = k*max_buff_size)
+    test bp, bp ; If new buffer size = 0 (the rare situation, when length of file = k*max_buff_size)
     jne @@main_cycle ; But if != 0 we're ready to move on
 @@finish:
     ; flush buffer and exit
