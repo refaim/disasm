@@ -3,9 +3,9 @@
 .model small
 .386
 locals
-include funcs.inc
+
 extrn print: far, byte2hex: far, memcpy: far
-	extrn parse_jxx:far, parse_nop:far
+extrn parse_jxx:far, parse_nop:far
 
 OUT_BUFF_MARGIN equ 235
 IN_BUFF_MARGIN  equ 240
@@ -98,9 +98,8 @@ main proc
     push si 
     ; It's necessary to know entry state, because this is the only way to determine
     ; whether the command recognized
-    	invoke parse_jxx
-	invoke parse_nop
-	
+    invoke parse_jxx
+    invoke parse_nop
     ; If no command was recognized - simply output it
     mov al, byte ptr [si]
     call byte2hex
@@ -159,7 +158,7 @@ main proc
     lea dx, out_buff
     call print
 @@exit: ; normal exit
-    mov ah, 3eh ; close file
+    mov ah, 3Eh ; close file
     mov bx, filehandle
     int 21h
     mov ax, 4C00h
