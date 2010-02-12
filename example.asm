@@ -20,7 +20,7 @@ parse proc pascal far
 
 @@exit:
     ret
-parse_nop endp
+parse endp
 
 code ends
 end
