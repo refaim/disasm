@@ -2,7 +2,7 @@
 .386
 locals
 
-public print, byte2hex, memcpy
+public print, byte2hex
 
 code segment para public 'code' use16
 assume cs: code
@@ -43,21 +43,6 @@ uses bx, cx, dx
     jnz @@get_digit
     ret
 byte2hex endp
-
-; copy bytes from memory to memory
-; si - source address, di - destination address, cx - count to copy
-memcpy proc pascal far
-uses ax, bx, cx, si, di
-    mov bx, si
-    xor si, si
-@@copy:
-    mov al, byte ptr bx[si]
-    mov byte ptr [di], al
-    inc si
-    inc di
-    loop @@copy
-    ret
-memcpy endp
 
 code ends
 end

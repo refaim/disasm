@@ -2,8 +2,6 @@
 .386
 locals
 
-extrn memcpy: far
-
 public parse_nop
 
 data segment para public 'data' use16
@@ -20,10 +18,10 @@ uses cx
     push si
     lea si, nop_msg
     mov cx, 4
-    call memcpy
+    cld
+    rep movsb
     pop si
     inc si
-    add di, 4
 @@exit:
     ret
 parse_nop endp

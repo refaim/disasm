@@ -2,7 +2,7 @@
 .386
 locals
 
-extrn byte2hex: far, memcpy: far
+extrn byte2hex: far
 
 public parse_jxx
 
@@ -47,8 +47,8 @@ uses ax, bx, cx
     movzx si, op_shifts[si]
     lea si, op_str[si]
     mov cx, bx
-    call memcpy
-    add di, bx
+    cld
+    rep movsb
     pop si
     inc si
     ret
@@ -83,11 +83,11 @@ uses ax, cx, dx
     push si
     lea si, jcxz_str
     movzx cx, jcxz_len
-    call memcpy
+    cld
+    rep movsb
     pop si
     inc si
     movzx ax, jcxz_len
-    add di, ax
 @@operand:
     mov byte ptr [di], ' '
     inc di

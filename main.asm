@@ -4,7 +4,7 @@
 .386
 locals
 
-extrn print: far, byte2hex: far, memcpy: far
+extrn print: far, byte2hex: far
 
 include funcs.inc
 irp parse_func, <FUNCS>
@@ -34,9 +34,9 @@ data segment para public 'data' use16
     in_buff_size dw 0
     out_buff db 255 dup (?)
 
-    e_fopen db 'file opening failed$'
-    e_fread db 'file reading failed$'
-    e_si_dec db 'si has been reduced during the parsing, it is forbidden$'
+    e_fopen db 10, 'file opening failed$'
+    e_fread db 10, 'file reading failed$'
+    e_si_dec db 10, 'si has been reduced during the parsing, it is forbidden$'
 
     funcs label dword
     irp parse_func, <FUNCS>
@@ -65,6 +65,8 @@ read endp
 main proc
     mov ax, data
     mov ds, ax
+    push ds
+    pop es
     ; Display message for input
     lea dx, input_msg
     call print
@@ -150,8 +152,11 @@ main proc
     sub cx, bx     ; length of tail
     mov bp, cx
     lea di, in_buff
-    call memcpy    ; copy tail to the begin of buffer
-    mov si, di
+    pusha ; temporary
+    cld
+    rep movsb ; copy tail to the begin of buffer
+    popa ; temporary
+    mov si, di 
     pop di
     mov dx, si
     add dx, cx
