@@ -28,7 +28,7 @@ endif
 all: clean $(APPNAME).exe
 
 clean:
-	del /q $(OUTFILES) 2> nul
+	del $(OUTFILES)
 
 inform:
 ifneq ($(CFG), release)
@@ -46,7 +46,7 @@ test:
 	$(TLINK) /t /c $@.obj
 
 test_clean:
-	del /q $(TESTOBJS) 2> nul
+	del $(TESTOBJS)
 
 $(APPNAME).exe: inform $(OBJS) $(PTEMPLATE).obj
 	$(TLINK) $(LFLAGS) $(OBJS) $(WLC_PTEMPLATE), $(APPNAME).exe
