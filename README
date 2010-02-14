@@ -20,7 +20,7 @@ FAQ для студентов 236 и 238 групп ИМКН ДВГУ:
 
 Q: Какие программы нужны для работы?
 A: 1. Turbo Assembler for DOS (версии не ниже 4.1): http://cloud.github.com/downloads/refaim/disasm/TASM_4.1.ZIP
-   2. MinGW (нужна утилита mingw32-make): http://www.mingw.org/
+   2. MinGW Make: http://github.com/downloads/refaim/disasm/mingw-make-win32.zip
 
 Q: Что нужно сделать, чтобы начать писать дизассемблер?
 A: 0. Скачать последнюю версию исходного кода: http://github.com/refaim/disasm/zipball/master
