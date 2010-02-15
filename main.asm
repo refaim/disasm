@@ -20,12 +20,17 @@ throw macro msg
     jmp fatal_error
 endm
 
+error_check macro errcode, errmsg, next_label
+    cmp ax, errcode
+    jne short next_label
+    throw errmsg
+endm
+
 stk segment stack use16
     db 256 dup (0)
 stk ends
 
 data segment para public 'data' use16
-    input_msg db 'Input filename: $'
     filehandle dw 0
 
     db 254
@@ -34,67 +39,92 @@ data segment para public 'data' use16
     in_buff_size dw 0
     out_buff db 255 dup (?)
 
-    e_fopen db 10, 'file opening failed$'
-    e_fread db 10, 'file reading failed$'
-    e_si_dec db 10, 'si has been reduced during the parsing, it is forbidden$'
+    e_si_dec db 10, 'si decrement not allowed$'
 
     funcs label dword
     irp parse_func, <FUNCS>
         dd parse_func
     endm
     funcs_end label dword
+
+    ; messages
+    input_msg db 'Input filename: ', '$'
+    ; errors
+    e_access_denied  db 10, 'Access denied',  10, '$'
+    e_file_not_found db 10, 'File not found', 10, '$'
+    e_invalid_handle db 10, 'Invalid handle', 10, '$'
+    e_path_not_found db 10, 'Path not found', 10, '$'
 data ends
 
 code segment para public 'code' use16
 assume cs: code, ds: data, ss: stk
 
-; reads [count] bytes from file
-; dx - offset of buffer, cx - count to read
-; **filehandler implictly will be set without any side help
-read proc pascal
+
+get_filename proc pascal
+uses ax, dx, si
+    lea dx, input_msg
+    call print
+    ; get console input and store in buffer [only 254 bytes will be read for this moment]
+    mov dx, offset in_buff - 2 ; the last symbol always will be 0Dh (carriage return)
+    mov ah, 0Ah ; buffered input
+    int 21h
+    mov al, in_buff - 1 ; read bytes count
+    movzx si, al
+    mov in_buff[si], 0 ; make ASCIZ string for fopen
+    ret
+get_filename endp
+
+; open file for read
+; in: dx -- filename offset
+; out: ax -- file handle
+fopen proc pascal
+    mov ax, 3D00h
+    int 21h
+    jnc short @@exit
+@@e1: error_check 02h, e_file_not_found, @@e2
+@@e2: error_check 03h, e_path_not_found, @@e3
+@@e3: error_check 05h, e_access_denied, @@exit
+@@exit:
+    ret
+fopen endp
+
+; read bytes from file
+; in: dx -- buffer offset, cx -- count to read
+; out: ax -- number of bytes read
+; file handle implictly will be set without any side help
+fread proc pascal
 uses bx
     mov bx, filehandle
     mov ah, 3Fh
     int 21h
     jnc short @@exit
-    throw e_fread
+@@e1: error_check 05h, e_access_denied, @@e2
+@@e2: error_check 06h, e_invalid_handle, @@exit
 @@exit:
     ret
-read endp
+fread endp
 
 main proc
     mov ax, data
-    mov ds, ax
+    mov ds, ax ; load data segment
     push ds
-    pop es
-    ; Display message for input
-    lea dx, input_msg
-    call print
-    ; Get console input and store in buffer [only 254 bytes will be read for this moment]
-    mov ah, 0Ah
-    mov dx, offset in_buff - 2 ; the last symbol always will be 0Dh
-    int 21h
-    mov al, in_buff - 1 ; get the count of read bytes
-    movzx si, al
-    mov in_buff[si], 0           ; prepare filename for retrieving a filehandler
-    ; Open file for read
-    mov ax, 3D00h
+    pop es ; set es = ds (for movsb)
+
+    call get_filename
     lea dx, in_buff
-    int 21h
-    jnc short @@initial_read
-    throw e_fopen
-@@initial_read:
-    ; initialization of commands buffer - reading from file
+    call fopen
     mov filehandle, ax
+
     mov cx, 255
     lea dx, in_buff
-    call read
+    call fread
     test ax, ax
     jz @@exit ; zero-length file
-    mov in_buff_size, ax ; actual bytes read
+    mov in_buff_size, ax
+
     ; prepare cycle
-    lea si, in_buff      ; preconditions for users : si - start of commands buffer
-    lea di, out_buff     ;                           di - start of output   buffer
+    lea si, in_buff  ; si -- start of commands buffer
+    lea di, out_buff ; di -- start of output buffer
     mov byte ptr [di], 10 ; LF
     inc di
 @@main_cycle:
@@ -163,7 +193,7 @@ main proc
     mov bx, 255
     sub bx, cx
     mov cx, bx
-    call read     ; and now in place after copied tail
+    call fread     ; and now in place after copied tail
     add bp, ax ; Evaluate the new buffer size (sizeof Tail + sizeof Actual Read)
     mov in_buff_size, bp
     test bp, bp ; If new buffer size = 0 (the rare situation, when length of file = k*max_buff_size)
