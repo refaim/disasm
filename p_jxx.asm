@@ -9,14 +9,14 @@ public parse_jxx
 short_flag equ 0
 near_flag equ 1
 
-check_opcode macro jxx_type, flag
+check_opcode macro jxx_type, flag, next_target
     cmp al, jxx_type[0]
-    jl short @@jcxz
+    jl short next_target
     cmp al, jxx_type[1]
-    jg short @@jcxz
+    jg short next_target
     sub al, jxx_type[0]
-    call write_cmd
     mov dx, flag ; short/near flag
+    call write_cmd
     jmp short @@operand
 endm
 
@@ -50,7 +50,11 @@ uses ax, bx, cx
     cld
     rep movsb
     pop si
-    inc si
+    inc si ; first opcode byte
+    cmp dx, near_flag
+    jne short @@exit
+    inc si ; second opcode byte, for near jumps
+@@exit:
     ret
 write_cmd endp
 
@@ -72,11 +76,10 @@ uses ax, cx, dx
     cmp al, oc_near_prefix
     je short @@near
 @@short:
-    check_opcode oc_short, short_flag
+    check_opcode oc_short, short_flag, @@jcxz
 @@near:
-    inc si
-    mov al, byte ptr [si]
-    check_opcode oc_near, near_flag
+    mov al, byte ptr [si + 1]
+    check_opcode oc_near, near_flag, @@exit
 @@jcxz:
     cmp al, jcxz_oc
     jne short @@exit
