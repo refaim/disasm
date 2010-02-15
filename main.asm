@@ -152,11 +152,11 @@ main proc
     sub cx, bx     ; length of tail
     mov bp, cx
     lea di, in_buff
-    pusha ; temporary
+    push cx
     cld
     rep movsb ; copy tail to the begin of buffer
-    popa ; temporary
-    mov si, di 
+    pop cx
+    lea si, in_buff
     pop di
     mov dx, si
     add dx, cx
