@@ -31,10 +31,11 @@ stk segment stack use16
 stk ends
 
 data segment para public 'data' use16
-    filehandle dw 0
+    filehandle dw ?
 
-    db 254
-    db 0
+    ; dos input buffer
+    db 254 ; maximum characters buffer can hold
+    db 0 ; number of chars from last input which may be recalled OR number of characters actually read, excluding CR
     in_buff db 255 dup (?)
     in_buff_size dw 0
     out_buff db 255 dup (?)
@@ -59,12 +60,12 @@ data ends
 code segment para public 'code' use16
 assume cs: code, ds: data, ss: stk
 
-
+; get filename from console and store in buffer
 get_filename proc pascal
 uses ax, dx, si
     lea dx, input_msg
     call print
-    ; get console input and store in buffer [only 254 bytes will be read for this moment]
+    ; get console input
     mov dx, offset in_buff - 2 ; the last symbol always will be 0Dh (carriage return)
     mov ah, 0Ah ; buffered input
     int 21h
@@ -77,7 +78,7 @@ get_filename endp
 ; open file for read
 ; in: dx -- filename offset
 ; out: ax -- file handle
-fopen proc pascal
+fopen proc
     mov ax, 3D00h
     int 21h
     jnc short @@exit
@@ -140,7 +141,7 @@ main proc
     je short @@continue
     throw e_si_dec
 @@continue:
-    add bx, 4
+    add bx, 4 ; next parse function
     cmp bx, offset funcs_end
     jne @@launcher
     ; if no command was recognized - simply output it
