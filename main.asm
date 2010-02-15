@@ -33,9 +33,6 @@ stk ends
 data segment para public 'data' use16
     filehandle dw ?
 
-    ; dos input buffer
-    db 254 ; maximum characters buffer can hold
-    db 0 ; number of chars from last input which may be recalled OR number of characters actually read, excluding CR
     in_buff db 255 dup (?)
     in_buff_size dw 0
     out_buff db 255 dup (?)
@@ -49,29 +46,44 @@ data segment para public 'data' use16
     funcs_end label dword
 
     ; messages
-    input_msg db 'Input filename: ', '$'
+    m_usage db 'Usage: disasm [filename]', 10, '$'
     ; errors
-    e_access_denied  db 10, 'Access denied',  10, '$'
-    e_file_not_found db 10, 'File not found', 10, '$'
-    e_invalid_handle db 10, 'Invalid handle', 10, '$'
-    e_path_not_found db 10, 'Path not found', 10, '$'
+    e_access_denied  db 'Access denied',  10, '$'
+    e_file_not_found db 'File not found', 10, '$'
+    e_invalid_handle db 'Invalid handle', 10, '$'
+    e_path_not_found db 'Path not found', 10, '$'
 data ends
 
 code segment para public 'code' use16
 assume cs: code, ds: data, ss: stk
 
-; get filename from console and store in buffer
+; get filename from command line arguments and stor in buffer
+; out: ax -- error code (01h if command line is empty)
 get_filename proc pascal
-uses ax, dx, si
-    lea dx, input_msg
-    call print
-    ; get console input
-    mov dx, offset in_buff - 2 ; the last symbol always will be 0Dh (carriage return)
-    mov ah, 0Ah ; buffered input
+uses cx, si, di
+    push ds
+    xor ax, ax
+    mov ah, 62h ; get psp address
     int 21h
-    mov al, in_buff - 1 ; read bytes count
-    movzx si, al
+    mov ds, bx ; load psp to data segment (for movsb)
+    movzx cx, [ds:80h] ; real command line length
+    test cx, cx
+    jz short @@usage
+    dec cx ; skip leading space
+    mov ax, cx ; save length   
+    mov si, 82h ; first char in command line
+    lea di, in_buff
+    cld
+    rep movsb
+    pop ds
+    mov si, ax
     mov in_buff[si], 0 ; make ASCIZ string for fopen
+@@exit:
+    xor ax, ax
+    ret
+@@usage:
+    pop ds
+    mov ax, 01h
     ret
 get_filename endp
 
@@ -112,6 +124,8 @@ main proc
     pop es ; set es = ds (for movsb)
 
     call get_filename
+    error_check 01h, m_usage, @@open_file ; check for empty command line
+@@open_file:
     lea dx, in_buff
     call fopen
     mov filehandle, ax
@@ -126,8 +140,6 @@ main proc
     ; prepare cycle
     lea si, in_buff  ; si -- start of commands buffer
     lea di, out_buff ; di -- start of output buffer
-    mov byte ptr [di], 10 ; LF
-    inc di
 @@main_cycle:
     push si
     ; It's necessary to know entry state, because this is the only way to determine
