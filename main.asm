@@ -20,126 +20,83 @@ throw macro msg
     jmp fatal_error
 endm
 
-error_check macro errcode, errmsg, next_label
-    cmp ax, errcode
-    jne short next_label
-    throw errmsg
-endm
-
 stk segment stack use16
     db 256 dup (0)
 stk ends
 
 data segment para public 'data' use16
-    filehandle dw ?
+    input_msg db 'Input filename: $'
+    filehandle dw 0
 
+    db 254
+    db 0
     in_buff db 255 dup (?)
     in_buff_size dw 0
     out_buff db 255 dup (?)
 
-    e_si_dec db 10, 'si decrement not allowed$'
+    e_fopen db 10, 'file opening failed$'
+    e_fread db 10, 'file reading failed$'
+    e_si_dec db 10, 'si has been reduced during the parsing, it is forbidden$'
 
     funcs label dword
     irp parse_func, <FUNCS>
         dd parse_func
     endm
     funcs_end label dword
-
-    ; messages
-    m_usage db 'Usage: disasm [filename]', 10, '$'
-    ; errors
-    e_access_denied  db 'Access denied',  10, '$'
-    e_file_not_found db 'File not found', 10, '$'
-    e_invalid_handle db 'Invalid handle', 10, '$'
-    e_path_not_found db 'Path not found', 10, '$'
 data ends
 
 code segment para public 'code' use16
 assume cs: code, ds: data, ss: stk
 
-; get filename from command line arguments and stor in buffer
-; out: ax -- error code (01h if command line is empty)
-get_filename proc pascal
-uses cx, si, di
-    push ds
-    xor ax, ax
-    mov ah, 62h ; get psp address
-    int 21h
-    mov ds, bx ; load psp to data segment (for movsb)
-    movzx cx, [ds:80h] ; real command line length
-    test cx, cx
-    jz short @@usage
-    dec cx ; skip leading space
-    mov ax, cx ; save length   
-    mov si, 82h ; first char in command line
-    lea di, in_buff
-    cld
-    rep movsb
-    pop ds
-    mov si, ax
-    mov in_buff[si], 0 ; make ASCIZ string for fopen
-@@exit:
-    xor ax, ax
-    ret
-@@usage:
-    pop ds
-    mov ax, 01h
-    ret
-get_filename endp
-
-; open file for read
-; in: dx -- filename offset
-; out: ax -- file handle
-fopen proc
-    mov ax, 3D00h
-    int 21h
-    jnc short @@exit
-@@e1: error_check 02h, e_file_not_found, @@e2
-@@e2: error_check 03h, e_path_not_found, @@e3
-@@e3: error_check 05h, e_access_denied, @@exit
-@@exit:
-    ret
-fopen endp
-
-; read bytes from file
-; in: dx -- buffer offset, cx -- count to read
-; out: ax -- number of bytes read
-; file handle implictly will be set without any side help
-fread proc pascal
+; reads [count] bytes from file
+; dx - offset of buffer, cx - count to read
+; **filehandler implictly will be set without any side help
+read proc pascal
 uses bx
     mov bx, filehandle
     mov ah, 3Fh
     int 21h
     jnc short @@exit
-@@e1: error_check 05h, e_access_denied, @@e2
-@@e2: error_check 06h, e_invalid_handle, @@exit
+    throw e_fread
 @@exit:
     ret
-fread endp
+read endp
 
 main proc
     mov ax, data
-    mov ds, ax ; load data segment
+    mov ds, ax
     push ds
-    pop es ; set es = ds (for movsb)
-
-    call get_filename
-    error_check 01h, m_usage, @@open_file ; check for empty command line
-@@open_file:
+    pop es
+    ; Display message for input
+    lea dx, input_msg
+    call print
+    ; Get console input and store in buffer [only 254 bytes will be read for this moment]
+    mov ah, 0Ah
+    mov dx, offset in_buff - 2 ; the last symbol always will be 0Dh
+    int 21h
+    mov al, in_buff - 1 ; get the count of read bytes
+    movzx si, al
+    mov in_buff[si], 0           ; prepare filename for retrieving a filehandler
+    ; Open file for read
+    mov ax, 3D00h
     lea dx, in_buff
-    call fopen
+    int 21h
+    jnc short @@initial_read
+    throw e_fopen
+@@initial_read:
+    ; initialization of commands buffer - reading from file
     mov filehandle, ax
-
     mov cx, 255
     lea dx, in_buff
-    call fread
+    call read
     test ax, ax
     jz @@exit ; zero-length file
-    mov in_buff_size, ax
-
+    mov in_buff_size, ax ; actual bytes read
     ; prepare cycle
-    lea si, in_buff  ; si -- start of commands buffer
-    lea di, out_buff ; di -- start of output buffer
+    lea si, in_buff      ; preconditions for users : si - start of commands buffer
+    lea di, out_buff     ;                           di - start of output   buffer
+    mov byte ptr [di], 10 ; LF
+    inc di
 @@main_cycle:
     push si
     ; It's necessary to know entry state, because this is the only way to determine
@@ -153,7 +110,7 @@ main proc
     je short @@continue
     throw e_si_dec
 @@continue:
-    add bx, 4 ; next parse function
+    add bx, 4
     cmp bx, offset funcs_end
     jne @@launcher
     ; if no command was recognized - simply output it
@@ -195,18 +152,18 @@ main proc
     sub cx, bx     ; length of tail
     mov bp, cx
     lea di, in_buff
-    push cx
+    pusha ; temporary
     cld
     rep movsb ; copy tail to the begin of buffer
-    pop cx
-    lea si, in_buff
+    popa ; temporary
+    mov si, di 
     pop di
     mov dx, si
     add dx, cx
     mov bx, 255
     sub bx, cx
     mov cx, bx
-    call fread     ; and now in place after copied tail
+    call read     ; and now in place after copied tail
     add bp, ax ; Evaluate the new buffer size (sizeof Tail + sizeof Actual Read)
     mov in_buff_size, bp
     test bp, bp ; If new buffer size = 0 (the rare situation, when length of file = k*max_buff_size)
