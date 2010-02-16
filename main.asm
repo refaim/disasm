@@ -32,7 +32,9 @@ data segment para public 'data' use16
     db 0
     in_buff db 255 dup (?)
     in_buff_size dw 0
+    user_buff db 32 dup (?)
     out_buff db 255 dup (?)
+    out_cursor db 0
 
     e_fopen db 10, 'file opening failed$'
     e_fread db 10, 'file reading failed$'
@@ -61,6 +63,20 @@ uses bx
 @@exit:
     ret
 read endp
+
+check_buff proc pascal
+uses bx, dx, di
+    movzx di, out_cursor
+    sub bx, offset out_buff
+    cmp bx, OUT_BUFF_MARGIN
+    jb short @@exit          ; We didn't exceed the constraints for output buffer
+    mov byte ptr [out_buff + di], '$'   ; NEVAR forget, that print accepts the $-terminated strings
+    mov out_cursor, 0               ; The out_buff offset still in ax, we won one memmory access operation :)
+    mov dx, di
+    call print
+@@exit:
+    ret
+check_buff endp
 
 main proc
     mov ax, data
@@ -94,7 +110,7 @@ main proc
     mov in_buff_size, ax ; actual bytes read
     ; prepare cycle
     lea si, in_buff      ; preconditions for users : si - start of commands buffer
-    lea di, out_buff     ;                           di - start of output   buffer
+    lea di, user_buff     ;                           di - start of output   buffer
     mov byte ptr [di], 10 ; LF
     inc di
 @@main_cycle:
@@ -123,16 +139,27 @@ main proc
     inc si    ; one unrecognized byte
 @@restart: ; Post iteration actions
     ; Check if in_buff need to be flushed
-    add sp, 2 ; Same to pop the si
-    lea ax, out_buff
-    mov bx, di
-    sub bx, ax
-    cmp bx, OUT_BUFF_MARGIN
-    jb short @@in_buff_check ; We didn't exceed the constraints for output buffer
-    mov byte ptr [di], '$'   ; NEVAR forget, that print accepts the $-terminated strings
-    mov di, ax ; The out_buff offset still in ax, we won one memmory access operation :)
-    mov dx, di
-    call print
+    ;pop bx  ; Get old si
+    ;push di ; Save user_buff
+    movzx bx, out_cursor
+    mov byte ptr [out_buff + bx], '['
+    inc bx
+    mov cx, si
+    pop dx
+    sub cx, dx
+    mov si, dx
+@@hex_print:
+    mov al, [si]
+    call byte2hex
+    xchg al, ah
+    mov word ptr [out_buff + bx], ax
+    mov [out_buff + bx + 1], ' ' 
+    add bx, 3
+    inc si
+    mov out_cursor, bl
+    call check_buff    
+    loop short @@hex_print    
+
 @@in_buff_check:
     mov ax, in_buff_size      ; Its possible, that we read less than buffer size
     cmp ax, 255               ; and we check for this case
