@@ -103,20 +103,6 @@ fopen proc
     ret
 fopen endp
 
-check_buff proc pascal
-uses bx, dx, di
-    movzx bx, out_cursor
-    ;add bx, offset out_buff
-    cmp bx, OUT_BUFF_MARGIN
-    jb short @@exit          ; We didn't exceed the constraints for output buffer
-    mov byte ptr [bx + out_buff], '$'   ; NEVAR forget, that print accepts the $-terminated strings
-    mov out_cursor, 0               ; The out_buff offset still in ax, we won one memmory access operation :)
-    lea dx, out_buff
-    call print
-@@exit:
-    ret
-check_buff endp
-
 ; read bytes from file
 ; in: dx -- buffer offset, cx -- count to read
 ; out: ax -- number of bytes read
@@ -132,6 +118,19 @@ uses bx
 @@exit:
     ret
 fread endp
+
+check_buff proc pascal
+uses bx, dx, di
+    movzx bx, out_cursor
+    cmp bx, OUT_BUFF_MARGIN
+    jb short @@exit ; we didn't exceed the constraints for output buffer
+    mov byte ptr [bx + out_buff], '$' ; NEVER forget, that print accepts the $-terminated strings
+    mov out_cursor, 0
+    lea dx, out_buff
+    call print
+@@exit:
+    ret
+check_buff endp
 
 main proc
     mov ax, data
@@ -179,8 +178,7 @@ main proc
     call byte2hex
     xchg al, ah
     movzx bx, out_cursor
-    ;mov di, out_buff
-    cmp cx, 0
+    test cx, cx
     je short @@write_byte
     mov byte ptr [out_buff + bx], '['
     mov cx, 0
@@ -191,12 +189,12 @@ main proc
     add bx, 3 ; two hex digits and one space
     mov out_cursor, bl
     lea di, user_buff
-    inc si    ; one unrecognized byte
+    inc si ; one unrecognized byte
     call check_buff
     jmp @@in_buff_check
-@@restart: ; Post successful-iteration actions
+@@restart: ; post successful-iteration actions
     movzx bx, out_cursor
-    cmp cx, 0 
+    test cx, cx
     jne short @@skip_unrecognize_ending
     mov byte ptr [out_buff + bx], ']'
     mov byte ptr [out_buff + bx + 1], 10
@@ -281,7 +279,7 @@ main proc
 @@finish:
     ; flush buffer and exit
     movzx bx, out_cursor
-    cmp cx, 0 ; if last command wasn't recognized
+    test cx, cx ; if last command wasn't recognized
     jne short @@finish_lastrecognized
     mov byte ptr [bx + out_buff], ']'
     inc bx
