@@ -66,13 +66,13 @@ read endp
 
 check_buff proc pascal
 uses bx, dx, di
-    movzx di, out_cursor
-    sub bx, offset out_buff
+    movzx bx, out_cursor
+    ;add bx, offset out_buff
     cmp bx, OUT_BUFF_MARGIN
     jb short @@exit          ; We didn't exceed the constraints for output buffer
-    mov byte ptr [out_buff + di], '$'   ; NEVAR forget, that print accepts the $-terminated strings
+    mov byte ptr [bx + out_buff], '$'   ; NEVAR forget, that print accepts the $-terminated strings
     mov out_cursor, 0               ; The out_buff offset still in ax, we won one memmory access operation :)
-    mov dx, di
+    lea dx, out_buff
     call print
 @@exit:
     ret
@@ -111,12 +111,14 @@ main proc
     ; prepare cycle
     lea si, in_buff      ; preconditions for users : si - start of commands buffer
     lea di, user_buff     ;                           di - start of output   buffer
+    mov cx, 1 ; 1 - last iteration wasn't unrecognized, 0 - otherwise
     mov byte ptr [di], 10 ; LF
     inc di
 @@main_cycle:
     push si
+    lea di, user_buff     ;                           di - start of output   buffer
     ; It's necessary to know entry state, because this is the only way to determine
-    ; whether the command recognized
+    ; whether the command were recognized
     lea bx, funcs
 @@launcher:
     call dword ptr [bx]
@@ -128,38 +130,78 @@ main proc
 @@continue:
     add bx, 4
     cmp bx, offset funcs_end
-    jne @@launcher
+    jne @@launcher ; only when we tried every func, we can declare byte as unrecognized
     ; if no command was recognized - simply output it
     mov al, byte ptr [si]
     call byte2hex
     xchg al, ah
-    mov [di], ax
-    mov byte ptr [di + 2], ' '
-    add di, 3 ; two hex digits and one space
+    movzx bx, out_cursor
+    ;mov di, out_buff
+    cmp cx, 0
+    je short @@write_byte
+    mov byte ptr [out_buff + bx], '['
+    mov cx, 0
+    inc bx
+@@write_byte:
+    mov word ptr [out_buff + bx], ax
+    mov byte ptr [out_buff + bx + 2], ' '
+    add bx, 3 ; two hex digits and one space
+    mov out_cursor, bl
+    lea di, user_buff
     inc si    ; one unrecognized byte
+    call check_buff
+    jmp @@in_buff_check
 @@restart: ; Post iteration actions
     ; Check if in_buff need to be flushed
     ;pop bx  ; Get old si
     ;push di ; Save user_buff
     movzx bx, out_cursor
+    cmp cx, 0 
+    jne short @@skip_unrecognize_ending
+    mov byte ptr [out_buff + bx - 1], ']'
+    mov byte ptr [out_buff + bx], 10
+    add bx, 1
+@@skip_unrecognize_ending:
     mov byte ptr [out_buff + bx], '['
     inc bx
     mov cx, si
-    pop dx
+    pop dx ; old si
     sub cx, dx
     mov si, dx
+    mov out_cursor, bl
 @@hex_print:
     mov al, [si]
+    movzx bx, out_cursor
     call byte2hex
     xchg al, ah
     mov word ptr [out_buff + bx], ax
-    mov [out_buff + bx + 1], ' ' 
+    mov [out_buff + bx + 2], ' ' 
     add bx, 3
     inc si
     mov out_cursor, bl
     call check_buff    
-    loop short @@hex_print    
+    loop short @@hex_print
 
+    movzx bx, out_cursor
+    mov byte ptr [out_buff + bx], ']'
+    mov byte ptr [out_buff + bx + 1], ' '
+    add bx, 2
+    mov out_cursor, bl
+
+    mov cx, di
+    sub cx, offset user_buff
+    add bx, cx
+    movzx di, out_cursor
+    add di, offset out_buff
+    push si
+    lea si, user_buff
+    cld
+    rep movsb
+    pop si
+    mov out_cursor, bl
+    call check_buff
+    mov cx, 1
+    ; now print user cmd
 @@in_buff_check:
     mov ax, in_buff_size      ; Its possible, that we read less than buffer size
     cmp ax, 255               ; and we check for this case
@@ -174,6 +216,7 @@ main proc
     sub bx, ax              ; We have simpy margin - at least 15 bytes from the end of buffer(it equals to the MAX length of Intel
     cmp bx, IN_BUFF_MARGIN  ; instruction)
     jb @@main_cycle ; If space is enough - continue cycle
+    push cx
     push di        ; save di - we still need to know where we stayed in output buffer after memory manipulations.
     mov cx, 255
     sub cx, bx     ; length of tail
@@ -193,6 +236,7 @@ main proc
     call read     ; and now in place after copied tail
     add bp, ax ; Evaluate the new buffer size (sizeof Tail + sizeof Actual Read)
     mov in_buff_size, bp
+    pop cx
     test bp, bp ; If new buffer size = 0 (the rare situation, when length of file = k*max_buff_size)
     jne @@main_cycle ; But if != 0 we're ready to move on
 @@finish:
