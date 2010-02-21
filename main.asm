@@ -156,9 +156,9 @@ main proc
     movzx bx, out_cursor
     cmp cx, 0 
     jne short @@skip_unrecognize_ending
-    mov byte ptr [out_buff + bx - 1], ']'
-    mov byte ptr [out_buff + bx], 10
-    add bx, 1
+    mov byte ptr [out_buff + bx], ']'
+    mov byte ptr [out_buff + bx + 1], 10
+    add bx, 2
 @@skip_unrecognize_ending:
     mov byte ptr [out_buff + bx], '['
     inc bx
@@ -239,7 +239,13 @@ main proc
     jne @@main_cycle ; But if != 0 we're ready to move on
 @@finish:
     ; flush buffer and exit
-    mov byte ptr [di], '$'
+    movzx bx, out_cursor
+    cmp cx, 0
+    jne short @@finish_lastrecognized
+    mov byte ptr [bx + out_buff], ']'
+    inc bx
+@@finish_lastrecognized:
+    mov byte ptr [bx + out_buff], '$'
     lea dx, out_buff
     call print
 @@exit: ; normal exit
