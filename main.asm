@@ -155,7 +155,6 @@ main proc
 
     ; prepare cycle
     lea si, in_buff      ; preconditions for users : si - start of commands buffer
-    lea di, user_buff    ;                           di - start of output   buffer
     mov cx, 1            ; 1 - last iteration wasn't unrecognized, 0 - otherwise
 @@main_cycle:
     push si
@@ -175,6 +174,7 @@ main proc
     cmp bx, offset funcs_end
     jne @@launcher ; only when we tried every func, we can declare byte as unrecognized
     ; if no command was recognized - simply output it
+    add sp, 2
     mov al, byte ptr [si]
     call byte2hex
     xchg al, ah
@@ -194,10 +194,7 @@ main proc
     inc si    ; one unrecognized byte
     call check_buff
     jmp @@in_buff_check
-@@restart: ; Post iteration actions
-    ; Check if in_buff need to be flushed
-    ;pop bx  ; Get old si
-    ;push di ; Save user_buff
+@@restart: ; Post successful-iteration actions
     movzx bx, out_cursor
     cmp cx, 0 
     jne short @@skip_unrecognize_ending
@@ -244,7 +241,6 @@ main proc
     mov out_cursor, bl
     call check_buff
     mov cx, 1
-    ; now print user cmd
 @@in_buff_check:
     mov ax, in_buff_size      ; Its possible, that we read less than buffer size
     cmp ax, 255               ; and we check for this case
@@ -285,7 +281,7 @@ main proc
 @@finish:
     ; flush buffer and exit
     movzx bx, out_cursor
-    cmp cx, 0
+    cmp cx, 0 ; if last command wasn't recognized
     jne short @@finish_lastrecognized
     mov byte ptr [bx + out_buff], ']'
     inc bx
