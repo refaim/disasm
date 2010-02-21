@@ -112,11 +112,9 @@ main proc
     lea si, in_buff      ; preconditions for users : si - start of commands buffer
     lea di, user_buff     ;                           di - start of output   buffer
     mov cx, 1 ; 1 - last iteration wasn't unrecognized, 0 - otherwise
-    mov byte ptr [di], 10 ; LF
-    inc di
 @@main_cycle:
     push si
-    lea di, user_buff     ;                           di - start of output   buffer
+    lea di, user_buff     ; di - start of output   buffer
     ; It's necessary to know entry state, because this is the only way to determine
     ; whether the command were recognized
     lea bx, funcs
