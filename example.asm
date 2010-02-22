@@ -2,8 +2,6 @@
 .386
 locals
 
-extrn memcpy: far
-
 public parse
 
 data segment para public 'data' use16
