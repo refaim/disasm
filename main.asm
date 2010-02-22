@@ -47,14 +47,14 @@ stk segment stack use16
 stk ends
 
 IN_BUFF_MARGIN  equ 240
-OUT_BUFF_MARGIN equ 235
+OUT_BUFF_MARGIN equ 200
 
 data segment para public 'data' use16
     filehandle dw ?
 
     in_buff db 255 dup (?)
     in_buff_size dw 0
-    user_buff db 32 dup (?)
+    user_buff db 80 dup (?)
     out_buff db 255 dup (?)
     out_cursor db 0
 
