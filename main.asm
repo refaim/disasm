@@ -12,6 +12,7 @@ irp parse_func, <FUNCS>
 endm
 
 safecall macro user_func
+local @@regs_changed, @@endcall
     irp reg, <ax, bx, cx, dx, bp>
         push reg
     endm
