@@ -199,12 +199,14 @@ start:
     and [bx+2],byte ptr 10
 
     ; старый файл с простыми тестами
+    ololo:
     jz short exit
     jcxz cycle
     nop
     mov ax, 123
     and ax, ax
     jz short exit
+    jne ololo
 
     mov cx, 16
     xor bx, bx
@@ -223,7 +225,6 @@ start:
     loop cycle
     nop
     nop
-
 
 exit:
     ret

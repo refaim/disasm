@@ -1,8 +1,11 @@
+; Conditional jumps disassembler
+; Author: Kharitonov Roman
 .model small
 .386
 locals
 
 extrn byte2hex: far
+extrn get_cur_byte_num: far
 
 public parse_jxx
 
@@ -18,6 +21,11 @@ check_opcode macro jxx_type, flag, next_target
     mov dx, flag ; short/near flag
     call write_cmd
     jmp short @@operand
+endm
+
+output_char macro ch
+    mov byte ptr [di], ch
+    inc di  
 endm
 
 data segment para public 'data' use16
@@ -60,8 +68,6 @@ write_cmd endp
 
 write_byte proc pascal
 uses ax
-    mov al, byte ptr [si]
-    inc si
     call byte2hex
     xchg al, ah
     mov [di], ax
@@ -72,13 +78,13 @@ write_byte endp
 parse_jxx proc pascal far
 uses ax, cx, dx
     xor ax, ax
-    mov al, byte ptr [si]
+    mov al, [si]
     cmp al, oc_near_prefix
     je short @@near
 @@short:
     check_opcode oc_short, short_flag, @@jcxz
 @@near:
-    mov al, byte ptr [si + 1]
+    mov al, [si + 1]
     check_opcode oc_near, near_flag, @@exit
 @@jcxz:
     cmp al, jcxz_oc
@@ -92,16 +98,25 @@ uses ax, cx, dx
     inc si
     movzx ax, jcxz_len
 @@operand:
-    mov byte ptr [di], ' '
-    inc di
-    call write_byte
+    output_char ' '
     cmp dx, near_flag
-    jne short @@finalize
+    jne short @@op_short
+@@op_near:
+    mov ax, word ptr [si]
+    add si, 2
+    jmp short @@write_operand
+@@op_short:
+    movsx ax, [si]
+    inc si
+@@write_operand:
+    call get_cur_byte_num
+    add cx, ax
+    mov al, ch
     call write_byte
-@@finalize:
-    mov byte ptr [di], 'h'
-    mov byte ptr [di + 1], 10
-    add di, 2
+    mov al, cl
+    call write_byte
+    output_char 'h'
+    output_char 10
 @@exit:
     ret
 parse_jxx endp
