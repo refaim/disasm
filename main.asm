@@ -66,14 +66,14 @@ data segment para public 'data' use16
     funcs_end label dword
 
     ; messages
-    m_usage db 'Usage: disasm [filename]', 10, '$'
+    m_usage db 'Usage: disasm [filename]', '$'
     ; file errors
-    e_access_denied  db 'Access denied',  10, '$'
-    e_file_not_found db 'File not found', 10, '$'
-    e_invalid_handle db 'Invalid handle', 10, '$'
-    e_path_not_found db 'Path not found', 10, '$'
+    e_access_denied  db 'Access denied', '$'
+    e_file_not_found db 'File not found', '$'
+    e_invalid_handle db 'Invalid handle', '$'
+    e_path_not_found db 'Path not found', '$'
     ; register errors
-    e_regs_changed db 'Your function has changed one or more general purpose registers', 10, '$'
+    e_regs_changed db 'Your function has changed one or more general purpose registers', '$'
 data ends
 
 code segment para public 'code' use16
@@ -318,6 +318,10 @@ main proc
     mov byte ptr [bx + out_buff], ']'
     inc bx
 @@finish_lastrecognized:
+    cmp byte ptr [bx + out_buff - 1], 10 ; check for odd LF
+    jne short @@finalize
+    dec bx ; remove odd LF
+@@finalize:
     mov byte ptr [bx + out_buff], '$'
     lea dx, out_buff
     call print
