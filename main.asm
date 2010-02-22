@@ -200,12 +200,17 @@ main proc
     test cx, cx
     je short @@write_byte
     mov byte ptr [out_buff + bx], '['
-    mov cx, 0
     inc bx
 @@write_byte:
+    test cx, cx
+    jne short @@skip_whitespace
+    mov byte ptr [out_buff + bx], ' '
+    inc bx
+@@skip_whitespace:
+    mov cx, 0
     mov word ptr [out_buff + bx], ax
-    mov byte ptr [out_buff + bx + 2], ' '
-    add bx, 3 ; two hex digits and one space
+    ;mov byte ptr [out_buff + bx + 2], ' '
+    add bx, 2 ; two hex digits and one space
     mov out_cursor, bl
     lea di, user_buff
     inc si ; one unrecognized byte
@@ -221,10 +226,13 @@ main proc
 @@skip_unrecognize_ending:
     mov byte ptr [out_buff + bx], '['
     inc bx
+    mov out_cursor, bl
     mov cx, si
     pop dx ; old si
     sub cx, dx
     mov si, dx
+    sub cx, 1
+    jz short @@print_last_byte
     mov out_cursor, bl
 @@hex_print:
     mov al, [si]
@@ -238,13 +246,20 @@ main proc
     mov out_cursor, bl
     call check_buff
     loop short @@hex_print
+@@print_last_byte:
+    movzx bx, out_cursor
+    mov al, [si]
+    inc si
+    call byte2hex
+    xchg al, ah
+    mov word ptr [out_buff + bx], ax
+    mov byte ptr [out_buff + bx + 2], ']'
+    mov byte ptr [out_buff + bx + 3], ' '
+    add bx, 4
+    mov out_cursor, bl
+    call check_buff
 
     movzx bx, out_cursor
-    mov byte ptr [out_buff + bx], ']'
-    mov byte ptr [out_buff + bx + 1], ' '
-    add bx, 2
-    mov out_cursor, bl
-
     mov cx, di
     sub cx, offset user_buff
     add bx, cx
