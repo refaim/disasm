@@ -33,10 +33,12 @@ throw macro msg
     jmp fatal_error
 endm
 
-error_check macro errcode, errmsg, next_label
+error_check macro errcode, errmsg
+local @@pass    
     cmp ax, errcode
-    jne short next_label
+    jne short @@pass
     throw errmsg
+@@pass:
 endm
 
 stk segment stack use16
@@ -86,7 +88,7 @@ uses cx, si, di
     mov ah, 62h ; get psp address
     int 21h
     mov ds, bx ; load psp to data segment (for movsb)
-    movzx cx, [ds:80h] ; real command line length
+    movzx cx, ds:80h ; real command line length
     test cx, cx
     jz short @@usage
     dec cx ; skip leading space
@@ -114,9 +116,9 @@ fopen proc
     mov ax, 3D00h
     int 21h
     jnc short @@exit
-@@e1: error_check 02h, e_file_not_found, @@e2
-@@e2: error_check 03h, e_path_not_found, @@e3
-@@e3: error_check 05h, e_access_denied, @@exit
+    error_check 02h, e_file_not_found
+    error_check 03h, e_path_not_found
+    error_check 05h, e_access_denied
 @@exit:
     ret
 fopen endp
@@ -131,8 +133,8 @@ uses bx
     mov ah, 3Fh
     int 21h
     jnc short @@exit
-@@e1: error_check 05h, e_access_denied, @@e2
-@@e2: error_check 06h, e_invalid_handle, @@exit
+    error_check 05h, e_access_denied
+    error_check 06h, e_invalid_handle
 @@exit:
     ret
 fread endp
@@ -157,8 +159,8 @@ main proc
     pop es ; set es = ds (for movsb)
 
     call get_filename
-    error_check 01h, m_usage, @@open_file ; check for empty command line
-@@open_file:
+    error_check 01h, m_usage
+
     lea dx, in_buff
     call fopen
     mov filehandle, ax
