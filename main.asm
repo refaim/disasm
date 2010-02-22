@@ -11,8 +11,21 @@ irp parse_func, <FUNCS>
     extrn parse_func: far
 endm
 
-OUT_BUFF_MARGIN equ 235
-IN_BUFF_MARGIN  equ 240
+safecall macro user_func
+    irp reg, <ax, bx, cx, dx, bp>
+        push reg
+    endm
+    call dword ptr user_func
+    irp reg, <bp, dx, cx, bx, ax>
+        pop tmp
+        cmp reg, tmp
+        jne short @@regs_changed
+    endm
+    jmp short @@endcall
+@@regs_changed:
+    throw e_regs_changed
+@@endcall:
+endm
 
 throw macro msg
     lea dx, msg
@@ -30,6 +43,9 @@ stk segment stack use16
     db 256 dup (0)
 stk ends
 
+IN_BUFF_MARGIN  equ 240
+OUT_BUFF_MARGIN equ 235
+
 data segment para public 'data' use16
     filehandle dw ?
 
@@ -39,7 +55,7 @@ data segment para public 'data' use16
     out_buff db 255 dup (?)
     out_cursor db 0
 
-    e_si_dec db 10, 'si decrement not allowed$'
+    tmp dw ?
 
     funcs label dword
     irp parse_func, <FUNCS>
@@ -49,11 +65,13 @@ data segment para public 'data' use16
 
     ; messages
     m_usage db 'Usage: disasm [filename]', 10, '$'
-    ; errors
+    ; file errors
     e_access_denied  db 'Access denied',  10, '$'
     e_file_not_found db 'File not found', 10, '$'
     e_invalid_handle db 'Invalid handle', 10, '$'
     e_path_not_found db 'Path not found', 10, '$'
+    ; register errors
+    e_regs_changed db 'Your function has changed one or more general purpose registers', 10, '$'
 data ends
 
 code segment para public 'code' use16
@@ -72,7 +90,7 @@ uses cx, si, di
     test cx, cx
     jz short @@usage
     dec cx ; skip leading space
-    mov ax, cx ; save length   
+    mov ax, cx ; save length
     mov si, 82h ; first char in command line
     lea di, in_buff
     cld
@@ -162,12 +180,11 @@ main proc
     ; whether the command were recognized
     lea bx, funcs
 @@launcher:
-    call dword ptr [bx]
+    safecall [bx]
     mov bp, sp
     cmp si, word ptr [bp]
     ja short @@restart
     je short @@continue
-    throw e_si_dec
 @@continue:
     add bx, 4 ; next parse function
     cmp bx, offset funcs_end
@@ -213,11 +230,11 @@ main proc
     call byte2hex
     xchg al, ah
     mov word ptr [out_buff + bx], ax
-    mov [out_buff + bx + 2], ' ' 
+    mov [out_buff + bx + 2], ' '
     add bx, 3
     inc si
     mov out_cursor, bl
-    call check_buff    
+    call check_buff
     loop short @@hex_print
 
     movzx bx, out_cursor
