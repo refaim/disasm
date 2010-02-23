@@ -15,6 +15,53 @@ endm
 .code
     org 100h
 start:
+    ; ближние переходы
+    jo exit
+    nop
+    jno exit
+    nop
+    jb exit
+    jc exit
+    jnae exit
+    nop
+    jae exit
+    jnb exit
+    jnc exit
+    nop
+    je exit
+    jz exit
+    nop
+    jnz exit
+    jne exit
+    nop
+    jbe exit
+    jna exit
+    nop
+    ja exit
+    jnbe exit
+    nop
+    js exit
+    nop
+    jns exit
+    nop
+    jp exit
+    jpe exit
+    nop
+    jpo exit
+    jnp exit
+    nop
+    jl exit
+    jnge exit
+    nop
+    jge exit
+    jnl exit
+    nop
+    jle exit
+    jng exit
+    nop
+    jg exit
+    jnle exit
+
     sal ax, 1
     sal bx, 2
     sal cx, 3
@@ -217,34 +264,6 @@ start:
     and [bx+2],word ptr 10
     and [bx+2],byte ptr 10
  
-    ; старый файл с простыми тестами
-    ololo:
-    jz short exit
-    jcxz cycle
-    nop
-    mov ax, 123
-    and ax, ax
-    jz short exit
-    jne ololo
- 
-    mov cx, 16
-    xor bx, bx
-    xor dx, dx
-    cycle:
-        shl ax, 1
-        jc short found
-        xor bx, bx
-        jmp short next
-        found:
-            inc bx
-            cmp bx, 4
-            jl short next
-            inc dx
-        next:
-    loop cycle
-    nop
-    nop
-
     sar al, cl   
     sar cl, 7
     sar dl, 6
@@ -272,6 +291,56 @@ start:
     sal bh, cl
     sal ax, 3
     sar byte ptr [si+300], 4
+    
+    ; короткие переходы
+    jo short exit
+    nop
+    jno short exit
+    nop
+    jb short exit
+    jc short exit
+    jnae short exit
+    nop
+    jae short exit
+    jnb short exit
+    jnc short exit
+    nop
+    je short exit
+    jz short exit
+    nop
+    jnz short exit
+    jne short exit
+    nop
+    jbe short exit
+    jna short exit
+    nop
+    ja short exit
+    jnbe short exit
+    nop
+    js short exit
+    nop
+    jns short exit
+    nop
+    jp short exit
+    jpe short exit
+    nop
+    jpo short exit
+    jnp short exit
+    nop
+    jl short exit
+    jnge short exit
+    nop
+    jge short exit
+    jnl short exit
+    nop
+    jle short exit
+    jng short exit
+    nop
+    jg short exit
+    jnle short exit
+    nop
+    jcxz exit
+    jecxz exit
 exit:
     ret
 end start
