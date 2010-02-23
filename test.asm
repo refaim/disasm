@@ -292,6 +292,51 @@ start:
     sal ax, 3
     sar byte ptr [si+300], 4
     
+    ; сложение
+    add al,12h
+    adc al,23h
+    nop
+    add ax,3412h
+    adc ax,9A78h
+    nop
+    add cl,al
+    add bh,bl
+    add al,bl
+    add bl,al
+    adc dl,dh
+    nop
+    add bx,dx
+    add ax,cx
+    adc ax,ax
+    adc dx,si
+    nop
+    add bl,42h
+    adc dh,76h
+    nop
+    add cx,7856h
+    add bx,37h
+    adc dx,8709h
+    adc bx,59h
+    nop
+    add byte ptr [bp+si],34h
+    adc byte ptr [bx+3412h],56h
+    nop
+    add word ptr [si+67h],8589h
+    add word ptr [bx+si],+32h
+    adc word ptr [si+67h],8589h
+    adc word ptr [bx+si],9032h
+    nop
+    add dl,[bp+di]
+    add [bp+si+12h],dh
+    adc [bx+5634h],bh
+    adc al,[bp+di]
+    nop
+    add dx,[bp+di]
+    add [bp+si+12h],si
+    adc [bx+5634h],di
+    adc ax,[ds:3412h]
+    nop
+
     ; короткие переходы
     jo short exit
     nop
