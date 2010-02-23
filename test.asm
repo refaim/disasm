@@ -62,23 +62,6 @@ start:
     jg exit
     jnle exit
 
-    sal ax, 1
-    sal bx, 2
-    sal cx, 3
-    sal dx, 4
-    sal sp, 5
-    sal bp, 6
-    sal si, 7
-    sal di, cl
-    
-    sal al, 1   
-    sal cl, 2
-    sal dl, 3
-    sal bl, 4
-    sal ah, 5
-    sal ch, 6
-    sal dh, 7
-    sal bh, cl
 
     
     test word ptr [bp+di]+0AAh,0ABCDh
@@ -263,6 +246,27 @@ start:
     and [bx+2],ax
     and [bx+2],word ptr 10
     and [bx+2],byte ptr 10
+   
+    ;Арифметические сдвиги
+    ;General Purpose Registers
+        ;mod = 11
+    sal ax, 1
+    sal bx, 2
+    sal cx, 3
+    sal dx, 4
+    sal sp, 5
+    sal bp, 6
+    sal si, 7
+    sal di, cl
+    
+    sal al, 1   
+    sal cl, 2
+    sal dl, 3
+    sal bl, 4
+    sal ah, 5
+    sal ch, 6
+    sal dh, 7
+    sal bh, cl
  
     sar al, cl   
     sar cl, 7
@@ -281,21 +285,35 @@ start:
     sar bp, 3
     sar si, 2
     sar di, 1
-
-    sal byte ptr [bp+di+8], 4
-    sal byte ptr [ds:1000], cl
-    sal word ptr [ds:1000], cl
-    sar byte ptr [ds:8], cl
-    sar word ptr [ds:10], cl
-    sal ax, 1
-    sal bh, cl
-    sal ax, 3
-    sar byte ptr [si+300], 4
-    
-    sal byte ptr [si + 123], cl
-    sar word ptr [di], 1
-    sal byte ptr [si], 10
-    sar word ptr [bx][1], 8
+         ; Косвенная адрессация
+             ;mod = 00
+    sar word ptr [bx][si], cl
+    sal byte ptr [bx][di], 4
+    sar word ptr [bp][si], 1
+    sal word ptr [bp][di], 10
+    sal byte ptr [si], cl
+    sar word ptr [di], 11
+    sal w1, 15
+    sar b1, 0EEh
+    sal byte ptr [bx], 8
+             ;mod=01
+    sal byte ptr [bx][si][15], 14
+    sar byte ptr [bx][di][11], cl
+    sal word ptr [bp][si][4], cl
+    sar byte ptr [bp][di][9], cl
+    sar word ptr [si][1][1][1], cl
+    sal byte ptr [di][4][2], 15
+    sar word ptr [bp][17], 1
+    sal byte ptr [bx][1], 1
+             ;mod=10
+    sal byte ptr [bx][si][1500], 14
+    sar byte ptr [bx][di][1001], cl
+    sal word ptr [bp][si][400], cl
+    sar byte ptr [bp][di][9000], cl
+    sar word ptr [si][100][100][100], cl
+    sal byte ptr [di][400][20], 15
+    sar word ptr [bp][1700], 1
+    sal byte ptr [bx][10000], 1
 
     ; сложение
     add al,12h
