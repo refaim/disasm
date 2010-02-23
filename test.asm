@@ -292,6 +292,11 @@ start:
     sal ax, 3
     sar byte ptr [si+300], 4
     
+    sal byte ptr [si + 123], cl
+    sar word ptr [di], 1
+    sal byte ptr [si], 10
+    sar word ptr [bx][1], 8
+
     ; сложение
     add al,12h
     adc al,23h
@@ -386,6 +391,8 @@ start:
     nop
     jcxz exit
     jecxz exit
+
+    ; деление
     div b1[si]
     div b1
     div al
@@ -396,10 +403,6 @@ start:
     div cx
     div dx
     div bx
-    sal byte ptr [si + 123], cl
-    sar word ptr [di], 1
-    sal byte ptr [si], 10
-    sar word ptr [bx][1], 8
 exit:
     ret
 end start
