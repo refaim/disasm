@@ -65,6 +65,19 @@ data ends
 ; offst_sz      = 0 - offset is 8bit,            1 - 16bit               
 flags record snd_op_type:2 = 0, size:1 = 0, rdoffst:1=0, offst_sz:1=0
 
+get_field macro field, dst, src
+    mov dst, src
+    and dst, mask field
+    shr dst, field
+endm
+
+set_field macro field, dst, src
+    and dst, not mask field
+    shl src, field
+    or dst, src
+    shr src, field
+endm
+
 EXIT_SUCCESS equ 0
 
 code segment para public 'code' use16
@@ -107,7 +120,7 @@ uses cx, dx
     mov al, ah                                                      
     and al, 00000111b; r/m                                          
     mov dh, al; r/m                                                 
-    getfield size cl, bl                                            
+    get_field size cl, bl                                            
     inc si                                                          
     push si                                                         
     cmp dl, 11b                                                     
@@ -126,16 +139,16 @@ uses cx, dx
     je short @@mod_00_rm_110                                        
     mov cl, dl                                                      
     dec cl                                                          
-    setfield offst_sz bl, cl                                        
+    set_field offst_sz bl, cl                                        
     mov cl, 1                                                       
     jmp short @@set_rdoffst                                         
 @@mod_00_rm_110:                                                    
     mov cl, 1                                                       
-    setfield offst_sz bl, cl                                        
+    set_field offst_sz bl, cl                                        
     cmp dh, 110b                                                    
     sete cl                                                         
 @@set_rdoffst:                                                      
-    setfield rdoffst bx, cl                                         
+    set_field rdoffst bl, cl                                         
     movzx si, dl                                                    
     shl si, 1                                                       
     mov si, [si + offset_array_top]                                 
@@ -152,13 +165,13 @@ uses cx, dx
     rep movsb
     pop bx
     pop si
-    getfield rdoffst cl, bl
+    get_field rdoffst cl, bl
     cmp cl, 1
     jne short @@post
     mov al, [si]
     call byte2hex
     xchg al, ah
-    getfield offst_sz cl, bl
+    get_field offst_sz cl, bl
     cmp cl, 0
     jne short @@offset_16
     mov [di], ax 
@@ -178,7 +191,7 @@ uses cx, dx
     inc di    
     jmp short @@post  
 @@gpreg:     
-    getfield size al, bl   
+    get_field size al, bl   
     shl al, 1    
     movzx si, al   
     mov si, [array_11 + si]    
@@ -205,7 +218,7 @@ uses cx, dx
 fst_op endp
 
 snd_op proc pascal
-    getfield snd_op_type al, bl 
+    get_field snd_op_type al, bl 
     cmp al, 1
     je short @@print_1
     cmp al, 2 
@@ -247,24 +260,24 @@ uses ax, bx, cx, dx, bp
     jmp short @@exit
 @@one_16:
     mov cl, 1
-    setfield size bl, cl
+    set_field size bl, cl
 @@one_8:
     mov cl, 1
-    setfield snd_op_type bl, cl
+    set_field snd_op_type bl, cl
     jmp short @@common 
 @@cl_16:
     mov cl, 1
-    setfield size bl, cl
+    set_field size bl, cl
 @@cl_8: 
     mov cl, 2
-    setfield snd_op_type bl, cl
+    set_field snd_op_type bl, cl
     jmp short @@common
 @@imm_16: 
     mov cl, 1
-    setfield size bl, cl
+    set_field size bl, cl
 @@imm_8: 
     mov cl, 3 
-    setfield snd_op_type bl, cl
+    set_field snd_op_type bl, cl
     jmp short @@common 
 @@common:
     push si
