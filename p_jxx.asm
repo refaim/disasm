@@ -99,6 +99,7 @@ uses ax, cx, dx
     movzx ax, jcxz_len
 @@operand:
     output_char ' '
+    output_char '0'
     cmp dx, near_flag
     jne short @@op_short
 @@op_near:
