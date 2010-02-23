@@ -339,8 +339,8 @@ start:
     jg short exit
     jnle short exit
     nop
-    jcxz short exit
-    jecxz short exit
+    jcxz exit
+    jecxz exit
 exit:
     ret
 end start
