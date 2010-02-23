@@ -386,6 +386,20 @@ start:
     nop
     jcxz exit
     jecxz exit
+    div b1[si]
+    div b1
+    div al
+    div cl
+    div dl
+    div bl
+    div ax
+    div cx
+    div dx
+    div bx
+    sal byte ptr [si + 123], cl
+    sar word ptr [di], 1
+    sal byte ptr [si], 10
+    sar word ptr [bx][1], 8
 exit:
     ret
 end start
