@@ -11,6 +11,8 @@ irp parse_func, <FUNCS>
     extrn parse_func: far
 endm
 
+public get_cur_byte_num
+
 safecall macro user_func
 local @@regs_changed, @@endcall
     irp reg, <ax, bx, cx, dx, bp>
@@ -57,6 +59,8 @@ data segment para public 'data' use16
     user_buff db 80 dup (?)
     out_buff db 255 dup (?)
     out_cursor db 0
+
+    read_bytes_counter dw 0
 
     tmp dw ?
 
@@ -140,6 +144,15 @@ uses bx
     ret
 fread endp
 
+; out: cx -- number of the current byte
+get_cur_byte_num proc pascal far
+    mov cx, si
+    sub cx, offset in_buff
+    add cx, read_bytes_counter
+@@exit:
+    ret
+get_cur_byte_num endp
+
 check_buff proc pascal
 uses bx, dx, di
     movzx bx, out_cursor
@@ -210,7 +223,6 @@ main proc
 @@skip_whitespace:
     mov cx, 0
     mov word ptr [out_buff + bx], ax
-    ;mov byte ptr [out_buff + bx + 2], ' '
     add bx, 2 ; two hex digits and one space
     mov out_cursor, bl
     lea di, user_buff
@@ -292,6 +304,7 @@ main proc
     push di        ; save di - we still need to know where we stayed in output buffer after memory manipulations.
     mov cx, 255
     sub cx, bx     ; length of tail
+    add read_bytes_counter, bx ; increase byte counter by old in_buff size
     mov bp, cx
     lea di, in_buff
     push cx
