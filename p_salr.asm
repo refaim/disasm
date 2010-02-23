@@ -167,7 +167,7 @@ uses cx, dx
     pop si
     get_field rdoffst cl, bl
     cmp cl, 1
-    jne short @@post
+    jne short @@close_bracket
     mov al, [si]
     call byte2hex
     xchg al, ah
