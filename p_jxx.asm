@@ -113,6 +113,7 @@ uses ax, cx, dx
     call get_cur_byte_num
     add cx, ax
     mov al, ch
+    inc al
     call write_byte
     mov al, cl
     call write_byte
