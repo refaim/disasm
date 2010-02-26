@@ -247,73 +247,280 @@ start:
     and [bx+2],word ptr 10
     and [bx+2],byte ptr 10
 
-    ;Арифметические сдвиги
-    ;General Purpose Registers
-        ;mod = 11
-    sal ax, 1
-    sal bx, 2
-    sal cx, 3
-    sal dx, 4
-    sal sp, 5
-    sal bp, 6
-    sal si, 7
-    sal di, cl
+    nop
+    nop
+    nop
+    
+    ; арифметические сдвиги
 
     sal al, 1
-    sal cl, 2
-    sal dl, 3
-    sal bl, 4
-    sal ah, 5
-    sal ch, 6
-    sal dh, 7
-    sal bh, cl
-
+    sar al, 1
+    sal al, cl
     sar al, cl
-    sar cl, 7
-    sar dl, 6
-    sar bl, 5
-    sar ah, 4
-    sar ch, 3
-    sar dh, 2
+    sal al, 10
+    sar al, 10
+    nop
+    sal bl, 1
+    sar bl, 1
+    sal bl, cl
+    sar bl, cl
+    sal bl, 10
+    sar bl, 10
+    nop
+    sal cl, 1
+    sar cl, 1
+    sal cl, cl
+    sar cl, cl
+    sal cl, 10
+    sar cl, 10
+    nop
+    sal dl, 1
+    sar dl, 1
+    sal dl, cl
+    sar dl, cl
+    sal dl, 10
+    sar dl, 10
+    nop
+    sal ah, 1
+    sar ah, 1
+    sal ah, cl
+    sar ah, cl
+    sal ah, 10
+    sar ah, 10
+    nop
+    sal bh, 1
     sar bh, 1
+    sal bh, cl
+    sar bh, cl
+    sal bh, 10
+    sar bh, 10
+    nop
+    sal ch, 1
+    sar ch, 1
+    sal ch, cl
+    sar ch, cl
+    sal ch, 10
+    sar ch, 10
+    nop
+    sal dh, 1
+    sar dh, 1
+    sal dh, cl
+    sar dh, cl
+    sal dh, 10
+    sar dh, 10
 
+    nop
+    nop
+    nop
+
+    sal ax, 1
+    sar ax, 1
+    sal ax, cl
     sar ax, cl
-    sar bx, 7
-    sar cx, 6
-    sar dx, 5
-    sar sp, 4
-    sar bp, 3
-    sar si, 2
+    sal ax, 10
+    sar ax, 10
+    nop
+    sal bx, 1
+    sar bx, 1
+    sal bx, cl
+    sar bx, cl
+    sal bx, 10
+    sar bx, 10
+    nop
+    sal cx, 1
+    sar cx, 1
+    sal cx, cl
+    sar cx, cl
+    sal cx, 10
+    sar cx, 10
+    nop
+    sal dx, 1
+    sar dx, 1
+    sal dx, cl
+    sar dx, cl
+    sal dx, 10
+    sar dx, 10
+    nop
+    sal si, 1
+    sar si, 1
+    sal si, cl
+    sar si, cl
+    sal si, 10
+    sar si, 10
+    nop
+    sal di, 1
     sar di, 1
-         ; Косвенная адрессация
-             ;mod = 00
-    sar word ptr [bx][si], cl
-    sal byte ptr [bx][di], 4
-    sar word ptr [bp][si], 1
-    sal word ptr [bp][di], 10
-    sal byte ptr [si], cl
-    sar word ptr [di], 11
-    sal wordvar, 15
-    sar bytevar, 0EEh
-    sal byte ptr [bx], 8
-             ;mod=01
-    sal byte ptr [bx][si][15], 14
-    sar byte ptr [bx][di][11], cl
-    sal word ptr [bp][si][4], cl
-    sar byte ptr [bp][di][9], cl
-    sar word ptr [si][1][1][1], cl
-    sal byte ptr [di][4][2], 15
-    sar word ptr [bp][17], 1
-    sal byte ptr [bx][1], 1
-             ;mod=10
-    sal byte ptr [bx][si][1500], 14
-    sar byte ptr [bx][di][1001], cl
-    sal word ptr [bp][si][400], cl
-    sar byte ptr [bp][di][9000], cl
-    sar word ptr [si][100][100][100], cl
-    sal byte ptr [di][400][20], 15
-    sar word ptr [bp][1700], 1
-    sal byte ptr [bx][10000], 1
+    sal di, cl
+    sar di, cl
+    sal di, 10
+    sar di, 10
+    nop
+    sal sp, 1
+    sar sp, 1
+    sal sp, cl
+    sar sp, cl
+    sal sp, 10
+    sar sp, 10
+    nop
+    sal bp, 1
+    sar bp, 1
+    sal bp, cl
+    sar bp, cl
+    sal bp, 10
+    sar bp, 10
+
+    nop
+    nop
+    nop
+
+    sal byte ptr [si], 0Ah
+    sar byte ptr [si], 0Ah
+    sal word ptr [si], 0Ah
+    sar word ptr [si], 0Ah
+    nop
+    sal byte ptr [di], 0Ah
+    sar byte ptr [di], 0Ah
+    sal word ptr [di], 0Ah
+    sar word ptr [di], 0Ah
+    nop
+    sal byte ptr [bx], 0Ah
+    sar byte ptr [bx], 0Ah
+    sal word ptr [bx], 0Ah
+    sar word ptr [bx], 0Ah
+    nop
+    sal byte ptr [bp], 0Ah
+    sar byte ptr [bp], 0Ah
+    sal word ptr [bp], 0Ah
+    sar word ptr [bp], 0Ah
+
+    nop
+    nop
+    nop
+    
+    sal byte ptr [si + 20h], 0Ah
+    sar byte ptr [si + 20h], 0Ah
+    sal word ptr [si + 20h], 0Ah
+    sar word ptr [si + 20h], 0Ah
+    nop
+    sal byte ptr [di + 20h], 0Ah
+    sar byte ptr [di + 20h], 0Ah
+    sal word ptr [di + 20h], 0Ah
+    sar word ptr [di + 20h], 0Ah
+    nop
+    sal byte ptr [bx + 20h], 0Ah
+    sar byte ptr [bx + 20h], 0Ah
+    sal word ptr [bx + 20h], 0Ah
+    sar word ptr [bx + 20h], 0Ah
+    nop
+    sal byte ptr [bp + 20h], 0Ah
+    sar byte ptr [bp + 20h], 0Ah
+    sal word ptr [bp + 20h], 0Ah
+    sar word ptr [bp + 20h], 0Ah
+
+    nop
+    nop
+    nop
+
+    sal byte ptr [bx + si + 10h], 80h
+    sar byte ptr [bx + si + 10h], 80h
+    sal word ptr [bx + si + 10h], 80h
+    sar word ptr [bx + si + 10h], 80h
+    nop
+    sal byte ptr [bx + di + 10h], 80h
+    sar byte ptr [bx + di + 10h], 80h
+    sal word ptr [bx + di + 10h], 80h
+    sar word ptr [bx + di + 10h], 80h
+    nop
+    sal byte ptr [bp + si + 10h], 80h
+    sar byte ptr [bp + si + 10h], 80h
+    sal word ptr [bp + si + 10h], 80h
+    sar word ptr [bp + si + 10h], 80h
+    nop
+    sal byte ptr [bp + di + 10h], 80h
+    sar byte ptr [bp + di + 10h], 80h
+    sal word ptr [bp + di + 10h], 80h
+    sar word ptr [bp + di + 10h], 80h
+
+    nop
+    nop
+    nop
+
+    sal bytevar, 80h
+    sar bytevar, 80h
+    sal wordvar, 80h
+    sar wordvar, 80h
+
+    nop
+    nop
+    nop
+
+    sal bytevar[si], 80h
+    sar bytevar[si], 80h
+    sal wordvar[si], 80h
+    sar wordvar[si], 80h
+    nop
+    sal bytevar[di], 80h
+    sar bytevar[di], 80h
+    sal wordvar[di], 80h
+    sar wordvar[di], 80h
+    nop
+    sal bytevar[bp], 80h
+    sar bytevar[bp], 80h
+    sal wordvar[bp], 80h
+    sar wordvar[bp], 80h
+    nop
+    sal bytevar[bx], 80h
+    sar bytevar[bx], 80h
+    sal wordvar[bx], 80h
+    sar wordvar[bx], 80h
+
+    nop
+    nop
+    nop
+
+    sal bytevar[bx + si], 80h
+    sar bytevar[bx + si], 80h
+    sal wordvar[bx + si], 80h
+    sar wordvar[bx + si], 80h
+    nop
+    sal bytevar[bx + di], 80h
+    sar bytevar[bx + di], 80h
+    sal wordvar[bx + di], 80h
+    sar wordvar[bx + di], 80h
+    nop
+    sal bytevar[bp + si], 80h
+    sar bytevar[bp + si], 80h
+    sal wordvar[bp + si], 80h
+    sar wordvar[bp + si], 80h
+    nop
+    sal bytevar[bp + di], 80h
+    sar bytevar[bp + di], 80h
+    sal wordvar[bp + di], 80h
+    sar wordvar[bp + di], 80h
+
+    nop
+    nop
+    nop
+
+    sal bytevar[bx + si + 10], 80h
+    sar bytevar[bx + si + 10], 80h
+    sal wordvar[bx + si + 10], 80h
+    sar wordvar[bx + si + 10], 80h
+    nop
+    sal bytevar[bx + di + 10], 80h
+    sar bytevar[bx + di + 10], 80h
+    sal wordvar[bx + di + 10], 80h
+    sar wordvar[bx + di + 10], 80h
+    nop
+    sal bytevar[bp + si + 10], 80h
+    sar bytevar[bp + si + 10], 80h
+    sal wordvar[bp + si + 10], 80h
+    sar wordvar[bp + si + 10], 80h
+    nop
+    sal bytevar[bp + di + 10], 80h
+    sar bytevar[bp + di + 10], 80h
+    sal wordvar[bp + di + 10], 80h
+    sar wordvar[bp + di + 10], 80h
 
     nop
     nop
@@ -434,25 +641,25 @@ start:
     nop
     nop
 
-    div byte ptr [si][3]
-    idiv byte ptr [si][3]
-    div word ptr [si][3]
-    idiv word ptr [si][3]
+    div byte ptr [si + 3]
+    idiv byte ptr [si + 3]
+    div word ptr [si + 3]
+    idiv word ptr [si + 3]
     nop
-    div byte ptr [di][3]
-    idiv byte ptr [di][3]
-    div word ptr [di][3]
-    idiv word ptr [di][3]
+    div byte ptr [di + 3]
+    idiv byte ptr [di + 3]
+    div word ptr [di + 3]
+    idiv word ptr [di + 3]
     nop
-    div byte ptr [bx][3]
-    idiv byte ptr [bx][3]
-    div word ptr [bx][3]
-    idiv word ptr [bx][3]
+    div byte ptr [bx + 3]
+    idiv byte ptr [bx + 3]
+    div word ptr [bx + 3]
+    idiv word ptr [bx + 3]
     nop
-    div byte ptr [bp][3]
-    idiv byte ptr [bp][3]
-    div word ptr [bp][3]
-    idiv word ptr [bp][3]
+    div byte ptr [bp + 3]
+    idiv byte ptr [bp + 3]
+    div word ptr [bp + 3]
+    idiv word ptr [bp + 3]
 
     nop
     nop
@@ -482,25 +689,25 @@ start:
     nop
     nop
 
-    div byte ptr [bx][si][15]
-    idiv byte ptr [bx][si][15]
-    div word ptr [bx][si][4]
-    idiv word ptr [bx][si][4]
+    div byte ptr [bx + si + 15]
+    idiv byte ptr [bx + si + 15]
+    div word ptr [bx + si + 4]
+    idiv word ptr [bx + si + 4]
     nop
-    div byte ptr [bx][di][11]
-    idiv byte ptr [bx][di][11]
-    div word ptr [bx][di][11]
-    idiv word ptr [bx][di][11]
+    div byte ptr [bx + di + 11]
+    idiv byte ptr [bx + di + 11]
+    div word ptr [bx + di + 11]
+    idiv word ptr [bx + di + 11]
     nop
-    div byte ptr [bp][si][4]
-    idiv byte ptr [bp][si][4]
-    div word ptr [bp][si][4]
-    idiv word ptr [bp][si][4]
+    div byte ptr [bp + si + 4]
+    idiv byte ptr [bp + si + 4]
+    div word ptr [bp + si + 4]
+    idiv word ptr [bp + si + 4]
     nop
-    div byte ptr [bp][di][9]
-    idiv byte ptr [bp][di][9]
-    div word ptr [bp][di][9]
-    idiv word ptr [bp][di][9]
+    div byte ptr [bp + di + 9]
+    idiv byte ptr [bp + di + 9]
+    div word ptr [bp + di + 9]
+    idiv word ptr [bp + di + 9]
 
     nop
     nop
