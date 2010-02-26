@@ -8,8 +8,8 @@ generate_void macro
 endm
 
 .DATA
-    w1 dw 1000
-    b1 db 19
+    wordvar dw 1000
+    bytevar db 19
     db 0DEh,0ADh,0BEh,0EFh
 
 .code
@@ -201,19 +201,19 @@ start:
 
     ;Следующие две команды эквивалентны.
     and cx,ds:014Ah ;r16 m16
-    and cx,w1
+    and cx,wordvar
 
     ;Следующие две команды эквивалентны.
     and ds:014Ah,cx ;m16 r16
-    and w1,cx
+    and wordvar,cx
 
     ;Следующие две команды эквивалентны.
     and cl,ds:014Ch ;r8 m8
-    and cl,b1
+    and cl,bytevar
 
     ;Следующие две команды эквивалентны.
     and ds:014Ch,cl ;m8 r8
-    and b1,cl
+    and bytevar,cl
 
     and ds:0109h,word ptr 100 ;m16 i16
 
@@ -293,8 +293,8 @@ start:
     sal word ptr [bp][di], 10
     sal byte ptr [si], cl
     sar word ptr [di], 11
-    sal w1, 15
-    sar b1, 0EEh
+    sal wordvar, 15
+    sar bytevar, 0EEh
     sal byte ptr [bx], 8
              ;mod=01
     sal byte ptr [bx][si][15], 14
@@ -410,15 +410,6 @@ start:
     nop
     nop
 
-    div w1
-    idiv w1
-    div b1
-    idiv b1
-
-    nop
-    nop
-    nop
-
     div byte ptr [si]
     idiv byte ptr [si]
     div word ptr [si]
@@ -433,6 +424,35 @@ start:
     idiv byte ptr [bx]
     div word ptr [bx]
     idiv word ptr [bx]
+    nop
+    div byte ptr [bp]
+    idiv byte ptr [bp]
+    div word ptr [bp]
+    idiv word ptr [bp]
+
+    nop
+    nop
+    nop
+
+    div byte ptr [si][3]
+    idiv byte ptr [si][3]
+    div word ptr [si][3]
+    idiv word ptr [si][3]
+    nop
+    div byte ptr [di][3]
+    idiv byte ptr [di][3]
+    div word ptr [di][3]
+    idiv word ptr [di][3]
+    nop
+    div byte ptr [bx][3]
+    idiv byte ptr [bx][3]
+    div word ptr [bx][3]
+    idiv word ptr [bx][3]
+    nop
+    div byte ptr [bp][3]
+    idiv byte ptr [bp][3]
+    div word ptr [bp][3]
+    idiv word ptr [bp][3]
 
     nop
     nop
@@ -456,54 +476,7 @@ start:
     div byte ptr [bp + di]
     idiv byte ptr [bp + di]
     div word ptr [bp + di]
-
-    nop
-    nop
-    nop
-
-    div byte ptr [si][3]
-    idiv byte ptr [si][3]
-    div word ptr [si][3]
-    idiv word ptr [si][3]
-    nop
-    div byte ptr [di][3]
-    idiv byte ptr [di][3]
-    div word ptr [di][3]
-    idiv word ptr [di][3]
-    nop
-    div byte ptr [bp][3]
-    idiv byte ptr [bp][3]
-    div word ptr [bp][3]
-    idiv word ptr [bp][3]
-    nop
-    div byte ptr [bp]
-    idiv byte ptr [bp]
-    div word ptr [bp]
-    idiv word ptr [bp]
-
-    nop
-    nop
-    nop
-
-    div byte ptr [si][3]
-    idiv byte ptr [si][3]
-    div word ptr [si][3]
-    idiv word ptr [si][3]
-    nop
-    div byte ptr [di][3]
-    idiv byte ptr [di][3]
-    div word ptr [di][3]
-    idiv word ptr [di][3]
-    nop
-    div byte ptr [bp][3]
-    idiv byte ptr [bp][3]
-    div word ptr [bp][3]
-    idiv word ptr [bp][3]
-    nop
-    div byte ptr [bp]
-    idiv byte ptr [bp]
-    div word ptr [bp]
-    idiv word ptr [bp]
+    idiv word ptr [bp + di]
 
     nop
     nop
@@ -511,13 +484,13 @@ start:
 
     div byte ptr [bx][si][15]
     idiv byte ptr [bx][si][15]
-    div byte ptr [bx][si][4]
-    idiv byte ptr [bx][si][4]
+    div word ptr [bx][si][4]
+    idiv word ptr [bx][si][4]
     nop
     div byte ptr [bx][di][11]
     idiv byte ptr [bx][di][11]
-    div byte ptr [bx][di][11]
-    idiv byte ptr [bx][di][11]
+    div word ptr [bx][di][11]
+    idiv word ptr [bx][di][11]
     nop
     div byte ptr [bp][si][4]
     idiv byte ptr [bp][si][4]
@@ -528,6 +501,87 @@ start:
     idiv byte ptr [bp][di][9]
     div word ptr [bp][di][9]
     idiv word ptr [bp][di][9]
+
+    nop
+    nop
+    nop
+
+    div bytevar
+    idiv bytevar
+    div wordvar
+    idiv wordvar
+
+    nop
+    nop
+    nop
+
+    div bytevar[si]
+    idiv bytevar[si]
+    div wordvar[si]
+    idiv wordvar[si]
+    nop
+    div bytevar[di]
+    idiv bytevar[di]
+    div wordvar[di]
+    idiv wordvar[di]
+    nop
+    div bytevar[bp]
+    idiv bytevar[bp]
+    div wordvar[bp]
+    idiv wordvar[bp]
+    nop
+    div bytevar[bx]
+    idiv bytevar[bx]
+    div wordvar[bx]
+    idiv wordvar[bx]
+
+    nop
+    nop
+    nop
+
+    div bytevar[bx + si]
+    idiv bytevar[bx + si]
+    div wordvar[bx + si]
+    idiv wordvar[bx + si]
+    nop
+    div bytevar[bx + di]
+    idiv bytevar[bx + di]
+    div wordvar[bx + di]
+    idiv wordvar[bx + di]
+    nop
+    div bytevar[bp + si]
+    idiv bytevar[bp + si]
+    div wordvar[bp + si]
+    idiv wordvar[bp + si]
+    nop
+    div bytevar[bp + di]
+    idiv bytevar[bp + di]
+    div wordvar[bp + di]
+    idiv wordvar[bp + di]
+
+    nop
+    nop
+    nop
+
+    div bytevar[bx + si + 10]
+    idiv bytevar[bx + si + 10]
+    div wordvar[bx + si + 10]
+    idiv wordvar[bx + si + 10]
+    nop
+    div bytevar[bx + di + 10]
+    idiv bytevar[bx + di + 10]
+    div wordvar[bx + di + 10]
+    idiv wordvar[bx + di + 10]
+    nop
+    div bytevar[bp + si + 10]
+    idiv bytevar[bp + si + 10]
+    div wordvar[bp + si + 10]
+    idiv wordvar[bp + si + 10]
+    nop
+    div bytevar[bp + di + 10]
+    idiv bytevar[bp + di + 10]
+    div wordvar[bp + di + 10]
+    idiv wordvar[bp + di + 10]
 
     nop
     nop
