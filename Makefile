@@ -15,7 +15,7 @@ CFG = debug
 endif
 
 TASM = ${TASM_PATH}/TASM.EXE
-TLINK = ${TASM_PATH}/TLINK.EXE
+TLINK = proxy.bat
 TD = ${TASM_PATH}/TD.EXE
 
 TFLAGS = /ml /t /w2

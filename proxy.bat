@@ -1,0 +1,1 @@
+%TASM_PATH%\tlink.exe %*
