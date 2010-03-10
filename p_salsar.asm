@@ -168,14 +168,17 @@ uses cx, dx
     get_field rdoffst cl, bl
     cmp cl, 1
     jne short @@close_bracket
+    mov byte ptr [di], '0'
+    inc di
     mov al, [si]
     call byte2hex
     xchg al, ah
     get_field offst_sz cl, bl
     cmp cl, 0
     jne short @@offset_16
-    mov [di], ax 
-    add di, 2 
+    mov [di], ax
+    mov byte ptr [di + 2], 'h' 
+    add di, 3 
     inc si  
     jmp short @@close_bracket
 @@offset_16: 
@@ -183,9 +186,10 @@ uses cx, dx
     mov al, [si + 1]  
     call byte2hex    
     xchg al, ah   
-    mov [di], ax  
+    mov [di], ax
+    mov byte ptr [di + 4], 'h'  
     add si, 2  
-    add di, 4    
+    add di, 5    
 @@close_bracket:
     mov byte ptr [di], ']'  
     inc di    
@@ -225,7 +229,8 @@ snd_op proc pascal
     je short @@print_cl
     jmp short @@print_imm
 @@print_1:
-    mov word ptr [di], "10"
+    mov dword ptr [di], "h100"
+    add di, 2
     jmp short @@exit
 @@print_cl:
     mov word ptr [di], "lc"
@@ -234,8 +239,11 @@ snd_op proc pascal
     mov al, [si] 
     inc si 
     call byte2hex 
-    xchg al, ah 
-    mov word ptr [di], ax 
+    xchg al, ah
+    mov byte ptr [di], '0' 
+    mov word ptr [di + 1], ax
+    mov byte ptr [di + 3], 'h'
+    add di, 2 
 @@exit: 
     add di, 2 
     ret  
